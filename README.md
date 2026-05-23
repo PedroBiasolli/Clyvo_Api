@@ -90,6 +90,26 @@ O projeto usa Oracle. A connection string fica em `appsettings.json` apontando p
 
 Para quem prefere ir direto pelo SQL, os scripts DDL e de seed estão em `/scripts` e podem ser executados via SQL Developer ou DBeaver.
 
+## Como rodar
+
+Precisa do .NET 8 SDK e de acesso ao Oracle FIAP (ou um Oracle local rodando).
+
+Antes de subir, abra `Clyvo.PetCare.Api/appsettings.json` e troque o RM e a senha na connection string `OracleFiap`. Depois:
+
+```bash
+git clone https://github.com/SEU_USUARIO/clyvo-petcare-api.git
+cd clyvo-petcare-api/Clyvo.PetCare.Api
+
+dotnet tool install --global dotnet-ef   # se ainda não tiver
+dotnet restore
+dotnet ef database update                # aplica as migrations no Oracle
+dotnet run
+```
+
+A API sobe em `http://localhost:5000` e o Swagger em `/swagger`. No Visual Studio, basta abrir a `.sln` e apertar F5.
+
+Quem não quiser usar EF Core pode rodar os scripts de `/scripts` direto no SQL Developer — criam o schema e populam dados de exemplo equivalentes.
+
 ## Próximos passos
 
 A ideia é evoluir o projeto nas próximas sprints com:
