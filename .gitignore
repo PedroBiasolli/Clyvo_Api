@@ -41,6 +41,7 @@ logs/
 # Environment / Secrets
 *.env
 appsettings.*.local.json
+appsettings.Development.json
 secrets.json
 
 # EF Core
