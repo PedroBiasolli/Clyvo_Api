@@ -29,7 +29,7 @@ var connectionString = builder.Configuration.GetConnectionString("OracleFiap")
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseOracle(connectionString, oracle =>
-            oracle.UseOracleSQLCompatibility("11"))
+            oracle.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion11))
            .EnableDetailedErrors(builder.Environment.IsDevelopment()));
 
 // ───────────────────────────────────────────────────────────────────────────────
