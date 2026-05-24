@@ -28,16 +28,17 @@ public class VeterinarioService : IVeterinarioService
 
         var total = await query.CountAsync();
 
-        var itens = await query
+        // Materializa as entidades primeiro e só então mapeia para DTO —
+        // EF Core não traduz chamada de método CLR para SQL.
+        var entidades = await query
             .OrderBy(v => v.Nome)
             .Skip((pagina - 1) * tamanhoPagina)
             .Take(tamanhoPagina)
-            .Select(v => MapToDto(v))
             .ToListAsync();
 
         return new PagedResultDto<VeterinarioResponseDto>
         {
-            Itens = itens,
+            Itens = entidades.Select(MapToDto),
             Pagina = pagina,
             TamanhoPagina = tamanhoPagina,
             TotalRegistros = total

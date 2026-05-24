@@ -28,11 +28,26 @@ public class TutorService : ITutorService
 
         var total = await query.CountAsync();
 
+        // Projeção direta para EF Core traduzir QuantidadePets em subquery COUNT no SQL,
+        // evitando trazer a coleção de Pets para memória.
         var itens = await query
             .OrderBy(t => t.Nome)
             .Skip((pagina - 1) * tamanhoPagina)
             .Take(tamanhoPagina)
-            .Select(t => MapToDto(t))
+            .Select(t => new TutorResponseDto
+            {
+                Id = t.Id,
+                Nome = t.Nome,
+                Cpf = t.Cpf,
+                Email = t.Email,
+                Telefone = t.Telefone,
+                Endereco = t.Endereco,
+                Cidade = t.Cidade,
+                Uf = t.Uf,
+                DataCadastro = t.DataCadastro,
+                AceitaNotificacoes = t.AceitaNotificacoes,
+                QuantidadePets = t.Pets.Count
+            })
             .ToListAsync();
 
         return new PagedResultDto<TutorResponseDto>
@@ -91,7 +106,9 @@ public class TutorService : ITutorService
 
     public async Task<TutorResponseDto?> AtualizarAsync(int id, AtualizarTutorDto dto)
     {
-        var tutor = await _db.Tutores.FirstOrDefaultAsync(t => t.Id == id);
+        var tutor = await _db.Tutores
+            .Include(t => t.Pets)
+            .FirstOrDefaultAsync(t => t.Id == id);
         if (tutor is null) return null;
 
         tutor.Nome = dto.Nome;
