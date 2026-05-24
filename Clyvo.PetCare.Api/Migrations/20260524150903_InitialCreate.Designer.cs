@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace Clyvo.PetCare.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260524143452_InitialCreate")]
+    [Migration("20260524150903_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -107,7 +107,7 @@ namespace Clyvo.PetCare.Api.Migrations
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Castrado")
-                        .HasColumnType("BOOLEAN")
+                        .HasColumnType("NUMBER(1)")
                         .HasColumnName("FL_CASTRADO");
 
                     b.Property<DateTime>("DataCadastro")
@@ -177,7 +177,7 @@ namespace Clyvo.PetCare.Api.Migrations
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("AceitaNotificacoes")
-                        .HasColumnType("BOOLEAN")
+                        .HasColumnType("NUMBER(1)")
                         .HasColumnName("FL_ACEITA_NOTIFICACOES");
 
                     b.Property<string>("Cidade")
@@ -300,7 +300,7 @@ namespace Clyvo.PetCare.Api.Migrations
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Ativo")
-                        .HasColumnType("BOOLEAN")
+                        .HasColumnType("NUMBER(1)")
                         .HasColumnName("FL_ATIVO");
 
                     b.Property<string>("Crmv")

@@ -25,7 +25,7 @@ namespace Clyvo.PetCare.Api.Migrations
                     NM_CIDADE = table.Column<string>(type: "NVARCHAR2(60)", maxLength: 60, nullable: true),
                     SG_UF = table.Column<string>(type: "NVARCHAR2(2)", maxLength: 2, nullable: true),
                     DT_CADASTRO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
-                    FL_ACEITA_NOTIFICACOES = table.Column<bool>(type: "BOOLEAN", nullable: false)
+                    FL_ACEITA_NOTIFICACOES = table.Column<bool>(type: "NUMBER(1)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,7 +43,7 @@ namespace Clyvo.PetCare.Api.Migrations
                     DS_ESPECIALIDADE = table.Column<string>(type: "NVARCHAR2(80)", maxLength: 80, nullable: true),
                     DS_EMAIL = table.Column<string>(type: "NVARCHAR2(150)", maxLength: 150, nullable: false),
                     NR_TELEFONE = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: true),
-                    FL_ATIVO = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    FL_ATIVO = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     DT_CADASTRO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false)
                 },
                 constraints: table =>
@@ -64,7 +64,7 @@ namespace Clyvo.PetCare.Api.Migrations
                     VL_PESO_KG = table.Column<decimal>(type: "NUMBER(5,2)", nullable: false),
                     TP_PORTE = table.Column<int>(type: "NUMBER(10)", nullable: false),
                     NR_MICROCHIP = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: true),
-                    FL_CASTRADO = table.Column<bool>(type: "BOOLEAN", nullable: false),
+                    FL_CASTRADO = table.Column<bool>(type: "NUMBER(1)", nullable: false),
                     DS_OBSERVACOES = table.Column<string>(type: "NVARCHAR2(500)", maxLength: 500, nullable: true),
                     DT_CADASTRO = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     ID_TUTOR = table.Column<int>(type: "NUMBER(10)", nullable: false)
