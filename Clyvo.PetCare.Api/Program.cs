@@ -28,8 +28,7 @@ var connectionString = builder.Configuration.GetConnectionString("OracleFiap")
     ?? throw new InvalidOperationException("Connection string 'OracleFiap' não configurada em appsettings.json.");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseOracle(connectionString, oracle =>
-            oracle.UseOracleSQLCompatibility(OracleSQLCompatibility.DatabaseVersion11))
+    options.UseOracle(connectionString)
            .EnableDetailedErrors(builder.Environment.IsDevelopment()));
 
 // ───────────────────────────────────────────────────────────────────────────────

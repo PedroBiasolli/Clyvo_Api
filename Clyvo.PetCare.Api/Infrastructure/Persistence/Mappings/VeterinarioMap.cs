@@ -42,6 +42,7 @@ public class VeterinarioMap : IEntityTypeConfiguration<Veterinario>
 
         builder.Property(v => v.Ativo)
             .HasColumnName("FL_ATIVO")
+            .HasColumnType("NUMBER(1)")
             .IsRequired();
 
         builder.Property(v => v.DataCadastro)

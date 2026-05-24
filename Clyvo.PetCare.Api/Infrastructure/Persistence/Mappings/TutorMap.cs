@@ -55,6 +55,7 @@ public class TutorMap : IEntityTypeConfiguration<Tutor>
 
         builder.Property(t => t.AceitaNotificacoes)
             .HasColumnName("FL_ACEITA_NOTIFICACOES")
+            .HasColumnType("NUMBER(1)")
             .IsRequired();
 
         builder.HasMany(t => t.Pets)

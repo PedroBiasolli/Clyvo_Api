@@ -54,6 +54,7 @@ public class PetMap : IEntityTypeConfiguration<Pet>
 
         builder.Property(p => p.Castrado)
             .HasColumnName("FL_CASTRADO")
+            .HasColumnType("NUMBER(1)")
             .IsRequired();
 
         builder.Property(p => p.Observacoes)
