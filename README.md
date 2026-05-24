@@ -5,7 +5,7 @@ API REST para acompanhamento da jornada de saúde de cachorros — vacinas, cons
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![C#](https://img.shields.io/badge/C%23-12.0-239120?style=flat-square&logo=csharp&logoColor=white)](https://learn.microsoft.com/dotnet/csharp/)
 [![EF Core](https://img.shields.io/badge/EF%20Core-8.0-512BD4?style=flat-square)](https://learn.microsoft.com/ef/core/)
-[![Oracle](https://img.shields.io/badge/Oracle-19c-F80000?style=flat-square&logo=oracle&logoColor=white)](https://www.oracle.com/database/)
+[![Oracle](https://img.shields.io/badge/Oracle-11g%20XE-F80000?style=flat-square&logo=oracle&logoColor=white)](https://www.oracle.com/database/)
 [![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0-85EA2D?style=flat-square&logo=swagger&logoColor=black)](https://swagger.io/)
 
 ## O problema
@@ -25,7 +25,7 @@ A proposta aqui é inverter essa lógica. Em vez de só reagir, a API serve de b
 
 ## Stack
 
-.NET 8 com ASP.NET Core (Controllers), Entity Framework Core 8 sobre Oracle 19c e documentação via Swagger/OpenAPI 3.
+.NET 8 com ASP.NET Core (Controllers), Entity Framework Core 8 sobre Oracle 11g XE (servidor da FIAP) e documentação via Swagger/OpenAPI 3.
 
 ## Estrutura
 
