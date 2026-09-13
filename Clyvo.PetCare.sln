@@ -4,6 +4,12 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.Api", "Clyvo.PetCare.Api\Clyvo.PetCare.Api.csproj", "{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A1B2C3D4-E5F6-4789-9ABC-DEF012345001}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.UnitTests", "tests\Clyvo.PetCare.UnitTests\Clyvo.PetCare.UnitTests.csproj", "{B1B2C3D4-E5F6-4789-9ABC-DEF012345002}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.IntegrationTests", "tests\Clyvo.PetCare.IntegrationTests\Clyvo.PetCare.IntegrationTests.csproj", "{C1B2C3D4-E5F6-4789-9ABC-DEF012345003}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,9 +20,21 @@ Global
 		{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1B2C3D4-E5F6-4789-9ABC-DEF012345002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1B2C3D4-E5F6-4789-9ABC-DEF012345002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1B2C3D4-E5F6-4789-9ABC-DEF012345002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1B2C3D4-E5F6-4789-9ABC-DEF012345002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1B2C3D4-E5F6-4789-9ABC-DEF012345003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1B2C3D4-E5F6-4789-9ABC-DEF012345003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1B2C3D4-E5F6-4789-9ABC-DEF012345003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1B2C3D4-E5F6-4789-9ABC-DEF012345003}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B1B2C3D4-E5F6-4789-9ABC-DEF012345002} = {A1B2C3D4-E5F6-4789-9ABC-DEF012345001}
+		{C1B2C3D4-E5F6-4789-9ABC-DEF012345003} = {A1B2C3D4-E5F6-4789-9ABC-DEF012345001}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1D2E3F4-A5B6-4789-9ABC-DEF012345678}

@@ -35,6 +35,13 @@ Thumbs.db
 *.log
 logs/
 
+# Resultados de teste e cobertura (gerados)
+TestResults/
+**/TestResults/
+coverage.cobertura.xml
+coverage.opencover.xml
+resultado-testes.txt
+
 # User-specific files
 *.rsuser
 
