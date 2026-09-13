@@ -181,6 +181,14 @@ São **73 testes** no total — 53 unitários e 20 de integração, todos passan
 - **Endpoints (integration)**: fluxos ponta-a-ponta via `HttpClient` — model binding, serialização JSON, persistência, resposta
 - **Observabilidade**: `/health`, `/health/live`, `/health/ready`, `/metrics` e propagação do `X-Correlation-Id`
 
+### Sobre autenticação nos testes
+
+Os testes de integração cobrem o fluxo HTTP completo — model binding, validação, serviço, persistência e resposta — mas não exercitam autenticação, porque a API ainda não tem.
+
+Isso é decisão de escopo, não lacuna. Nas sprints anteriores a Clyvo Pet Care foi definida como serviço de back-office da clínica, rodando atrás do gateway interno, com o controle de acesso vivendo na camada de borda. Introduzir JWT agora só para ter o que testar acrescentaria superfície sem resolver problema real.
+
+A autenticação está no roadmap (ver "Próximos passos") com perfis de tutor, veterinário e admin de clínica. Quando entrar, os testes de integração ganham os cenários de 401 e 403 seguindo o mesmo padrão AAA já usado aqui — a `ClyvoWebApplicationFactory` já está preparada para injetar um handler de autenticação de teste.
+
 ### Como executar
 
 Todos os testes:
