@@ -40,7 +40,6 @@ TestResults/
 **/TestResults/
 coverage.cobertura.xml
 coverage.opencover.xml
-resultado-testes.txt
 
 # User-specific files
 *.rsuser
