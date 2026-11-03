@@ -1,97 +1,128 @@
-using Clyvo.PetCare.Api.Domain.Entities;
-using Clyvo.PetCare.Api.Domain.Enums;
+using Clyvo.PetCare.Domain.Entities;
+using Clyvo.PetCare.Domain.Enums;
+using Clyvo.PetCare.Domain.Exceptions;
+using Clyvo.PetCare.UnitTests.TestHelpers;
 
 namespace Clyvo.PetCare.UnitTests.Domain;
 
-/// <summary>
-/// Testes de domínio da entidade <see cref="Pet"/>.
-/// Padrão AAA (Arrange, Act, Assert).
-/// </summary>
+/// <summary>Regras da entidade <see cref="Pet"/>. Padrão AAA.</summary>
 public class PetTests
 {
     [Fact]
-    public void IdadeAnos_PetNascidoHaCincoAnos_DeveRetornarCinco()
+    public void Criar_DadosValidos_DeveVincularAoTutor()
     {
         // Arrange
-        var pet = new Pet
-        {
-            Nome = "Thor",
-            Raca = "Golden Retriever",
-            DataNascimento = DateTime.Today.AddYears(-5),
-            Sexo = Sexo.Macho,
-            Porte = PorteCachorro.Grande,
-            PesoKg = 30m,
-            TutorId = 1
-        };
+        var tutor = EntityBuilder.NovoTutor(id: 7);
 
         // Act
-        var idade = pet.IdadeAnos;
+        var pet = Pet.Criar("Thor", "Golden Retriever", new DateTime(2022, 3, 15), Sexo.Macho,
+            28.5m, PorteCachorro.Grande, " 982000123456789 ", castrado: true, observacoes: "  ", tutor);
+
+        // Assert
+        Assert.Equal(7, pet.TutorId);
+        Assert.Same(tutor, pet.Tutor);
+        Assert.Equal("982000123456789", pet.Microchip);
+        Assert.Null(pet.Observacoes);
+    }
+
+    [Fact]
+    public void Criar_DataNascimentoFutura_DeveLancarDomainException()
+    {
+        // Arrange
+        var tutor = EntityBuilder.NovoTutor();
+
+        // Act
+        var acao = () => Pet.Criar("Thor", "SRD", DateTime.Today.AddDays(1), Sexo.Macho,
+            10m, PorteCachorro.Medio, null, false, null, tutor);
+
+        // Assert
+        var erro = Assert.Throws<DomainException>(acao);
+        Assert.Contains("futura", erro.Message);
+    }
+
+    [Theory]
+    [InlineData(0.0)]
+    [InlineData(0.05)]
+    [InlineData(120.5)]
+    public void Criar_PesoForaDoIntervalo_DeveLancarDomainException(double peso)
+    {
+        // Arrange
+        var tutor = EntityBuilder.NovoTutor();
+
+        // Act
+        var acao = () => Pet.Criar("Thor", "SRD", new DateTime(2020, 1, 1), Sexo.Macho,
+            (decimal)peso, PorteCachorro.Medio, null, false, null, tutor);
+
+        // Assert
+        Assert.Throws<DomainException>(acao);
+    }
+
+    [Fact]
+    public void Criar_PorteInexistente_DeveLancarDomainException()
+    {
+        // Arrange
+        var tutor = EntityBuilder.NovoTutor();
+
+        // Act
+        var acao = () => Pet.Criar("Thor", "SRD", new DateTime(2020, 1, 1), Sexo.Macho,
+            10m, (PorteCachorro)99, null, false, null, tutor);
+
+        // Assert
+        Assert.Throws<DomainException>(acao);
+    }
+
+    [Fact]
+    public void Atualizar_DadosValidos_DeveAlterarDadosClinicos()
+    {
+        // Arrange
+        var pet = EntityBuilder.NovoPet();
+
+        // Act
+        pet.Atualizar("Thor II", "Labrador", 32m, PorteCachorro.Grande, null, castrado: false, "Alérgico a frango");
+
+        // Assert
+        Assert.Equal("Thor II", pet.Nome);
+        Assert.Equal("Labrador", pet.Raca);
+        Assert.Equal(32m, pet.PesoKg);
+        Assert.Null(pet.Microchip);
+        Assert.False(pet.Castrado);
+        Assert.Equal("Alérgico a frango", pet.Observacoes);
+    }
+
+    [Fact]
+    public void CalcularIdade_AindaNaoFezAniversarioNoAno_DeveDescontarUmAno()
+    {
+        // Arrange
+        var pet = EntityBuilder.NovoPet(dataNascimento: new DateTime(2020, 12, 10));
+
+        // Act
+        var idade = pet.CalcularIdade(new DateTime(2026, 12, 9));
 
         // Assert
         Assert.Equal(5, idade);
     }
 
     [Fact]
-    public void IdadeAnos_PetAindaNaoFezAniversarioNoAno_DeveRetornarIdadeMenosUm()
+    public void CalcularIdade_NoDiaDoAniversario_DeveContarOAnoCompleto()
     {
         // Arrange
-        var pet = new Pet
-        {
-            Nome = "Bento",
-            Raca = "SRD",
-            DataNascimento = DateTime.Today.AddYears(-3).AddDays(1), // faz aniversário amanhã
-            Sexo = Sexo.Macho,
-            Porte = PorteCachorro.Medio,
-            PesoKg = 15m,
-            TutorId = 1
-        };
+        var pet = EntityBuilder.NovoPet(dataNascimento: new DateTime(2020, 12, 10));
 
         // Act
-        var idade = pet.IdadeAnos;
-
-        // Assert — como ainda não fez aniversário, tem 2 anos (não 3)
-        Assert.Equal(2, idade);
-    }
-
-    [Fact]
-    public void IdadeAnos_PetNascidoHoje_DeveRetornarZero()
-    {
-        // Arrange
-        var pet = new Pet
-        {
-            Nome = "Neném",
-            Raca = "Beagle",
-            DataNascimento = DateTime.Today,
-            Sexo = Sexo.Femea,
-            Porte = PorteCachorro.Pequeno,
-            PesoKg = 3m,
-            TutorId = 1
-        };
-
-        // Act
-        var idade = pet.IdadeAnos;
+        var idade = pet.CalcularIdade(new DateTime(2026, 12, 10));
 
         // Assert
-        Assert.Equal(0, idade);
+        Assert.Equal(6, idade);
     }
 
     [Fact]
-    public void IdadeAnos_DataNascimentoFutura_DeveRetornarZero()
+    public void CalcularIdade_ReferenciaAnteriorAoNascimento_DeveRetornarZero()
     {
-        // Arrange — data inválida, entidade defende com clamp em zero
-        var pet = new Pet
-        {
-            Nome = "Erro",
-            Raca = "SRD",
-            DataNascimento = DateTime.Today.AddYears(1),
-            Sexo = Sexo.Macho,
-            Porte = PorteCachorro.Mini,
-            PesoKg = 5m,
-            TutorId = 1
-        };
+        // Arrange
+        var pet = EntityBuilder.NovoPet(dataNascimento: new DateTime(2022, 3, 15));
 
         // Act
-        var idade = pet.IdadeAnos;
+        var idade = pet.CalcularIdade(new DateTime(2021, 1, 1));
 
         // Assert
         Assert.Equal(0, idade);
@@ -100,21 +131,11 @@ public class PetTests
     [Theory]
     [InlineData(1)]
     [InlineData(7)]
-    [InlineData(12)]
-    [InlineData(20)]
-    public void IdadeAnos_PetsComDiferentesIdades_DeveCalcularCorretamente(int anos)
+    [InlineData(15)]
+    public void IdadeAnos_NascidoHaNAnos_DeveRetornarN(int anos)
     {
         // Arrange
-        var pet = new Pet
-        {
-            Nome = "Teste",
-            Raca = "SRD",
-            DataNascimento = DateTime.Today.AddYears(-anos),
-            Sexo = Sexo.Macho,
-            Porte = PorteCachorro.Medio,
-            PesoKg = 20m,
-            TutorId = 1
-        };
+        var pet = EntityBuilder.NovoPet(dataNascimento: DateTime.Today.AddYears(-anos));
 
         // Act
         var idade = pet.IdadeAnos;

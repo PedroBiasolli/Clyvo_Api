@@ -1,0 +1,141 @@
+# Roteiro de demonstração da Sprint 4 (Visual Studio / VS Code REST Client / Rider).
+# 1) Rode o login, copie o accessToken para @token e siga a ordem.
+
+@baseUrl = http://localhost:5000
+@token = COLE_AQUI_O_ACCESS_TOKEN
+
+### Login (público) — devolve o JWT
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@clyvo.com.br",
+  "senha": "Clyvo@2026"
+}
+
+### Usuário autenticado
+GET {{baseUrl}}/api/v1/auth/me
+Authorization: Bearer {{token}}
+
+### Criar usuário atendente (somente Admin)
+POST {{baseUrl}}/api/v1/auth/usuarios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Recepção Centro",
+  "email": "recepcao.centro@clyvo.com.br",
+  "senha": "Recepcao2026",
+  "perfil": "Atendente"
+}
+
+### Cadastrar tutor (CPF aceita pontuação)
+POST {{baseUrl}}/api/v1/tutores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Mariana Souza",
+  "cpf": "123.456.789-01",
+  "email": "mariana.souza@email.com",
+  "telefone": "11987654321",
+  "cidade": "São Paulo",
+  "uf": "SP",
+  "aceitaNotificacoes": true
+}
+
+### Listar tutores — filtros + ordenação + paginação + HATEOAS
+GET {{baseUrl}}/api/v1/tutores?cidade=São Paulo&ordenarPor=DataCadastro&direcao=Desc&pagina=1&tamanhoPagina=5
+Authorization: Bearer {{token}}
+
+### Cadastrar pet
+POST {{baseUrl}}/api/v1/pets
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Thor",
+  "raca": "Golden Retriever",
+  "dataNascimento": "2022-03-15",
+  "sexo": "Macho",
+  "pesoKg": 28.5,
+  "porte": "Grande",
+  "microchip": "982000123456789",
+  "castrado": true,
+  "tutorId": 1
+}
+
+### Cadastrar veterinário (somente Admin)
+POST {{baseUrl}}/api/v1/veterinarios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nome": "Dra. Ana Lima",
+  "crmv": "CRMV-SP 12345",
+  "especialidade": "Clínica Geral",
+  "email": "ana.lima@clyvo.com.br"
+}
+
+### Agendar consulta
+POST {{baseUrl}}/api/v1/consultas
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "dataHora": "2026-11-10T14:00:00",
+  "tipo": "Preventiva",
+  "motivoConsulta": "Check-up anual",
+  "petId": 1,
+  "veterinarioId": 1
+}
+
+### Regra de domínio: "Realizada" sem diagnóstico → 422 ProblemDetails
+PUT {{baseUrl}}/api/v1/consultas/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "dataHora": "2026-11-10T14:00:00",
+  "tipo": "Preventiva",
+  "status": "Realizada"
+}
+
+### Evolução válida com retorno sugerido
+PUT {{baseUrl}}/api/v1/consultas/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "dataHora": "2026-11-10T14:00:00",
+  "tipo": "Preventiva",
+  "status": "Realizada",
+  "diagnostico": "Animal saudável, peso adequado.",
+  "proximoRetorno": "2026-12-10T14:00:00",
+  "valorCobrado": 180
+}
+
+### Motor preventivo — retornos nos próximos 60 dias e doses atrasadas
+GET {{baseUrl}}/api/v1/consultas/retornos-proximos/60
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/api/v1/vacinas/atrasadas
+Authorization: Bearer {{token}}
+
+### Auditoria (MongoDB) — histórico de um registro
+GET {{baseUrl}}/api/v1/auditoria?entidade=Tutor&entidadeId=1
+Authorization: Bearer {{token}}
+
+### Auditoria (MongoDB) — aggregation por entidade/ação
+GET {{baseUrl}}/api/v1/auditoria/resumo
+Authorization: Bearer {{token}}
+
+### Health checks (públicos)
+GET {{baseUrl}}/health
+
+###
+GET {{baseUrl}}/health/ready
+
+### Métricas Prometheus
+GET {{baseUrl}}/metrics
