@@ -20,6 +20,7 @@ public sealed class AuthService : IAuthService
     private readonly IGeradorToken _geradorToken;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditoriaRegistrador _auditoria;
+    private readonly IUsuarioAtual _usuarioAtual;
     private readonly ILogger<AuthService> _logger;
 
     public AuthService(
@@ -28,6 +29,7 @@ public sealed class AuthService : IAuthService
         IGeradorToken geradorToken,
         IUnitOfWork unitOfWork,
         IAuditoriaRegistrador auditoria,
+        IUsuarioAtual usuarioAtual,
         ILogger<AuthService> logger)
     {
         _usuarios = usuarios;
@@ -35,6 +37,7 @@ public sealed class AuthService : IAuthService
         _geradorToken = geradorToken;
         _unitOfWork = unitOfWork;
         _auditoria = auditoria;
+        _usuarioAtual = usuarioAtual;
         _logger = logger;
     }
 
@@ -88,6 +91,18 @@ public sealed class AuthService : IAuthService
     {
         var usuario = await _usuarios.ObterPorIdAsync(id, cancellationToken)
                       ?? throw new RecursoNaoEncontradoException(Recurso, id);
+
+        return usuario.ParaDto();
+    }
+
+    public async Task<UsuarioDto> BuscarUsuarioAtualAsync(CancellationToken cancellationToken = default)
+    {
+        var id = _usuarioAtual.Id ?? throw new CredenciaisInvalidasException();
+        var usuario = await _usuarios.ObterPorIdAsync(id, cancellationToken);
+
+        // Token ainda válido de um usuário removido ou inativado: trata como não autenticado.
+        if (usuario is null || !usuario.Ativo)
+            throw new CredenciaisInvalidasException();
 
         return usuario.ParaDto();
     }

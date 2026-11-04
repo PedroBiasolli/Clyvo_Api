@@ -6,6 +6,9 @@ namespace Clyvo.PetCare.Application.Abstractions;
 /// </summary>
 public interface IUsuarioAtual
 {
+    /// <summary>Identificador do usuário autenticado, ou <c>null</c> se a requisição for anônima.</summary>
+    int? Id { get; }
+
     /// <summary>E-mail do usuário autenticado, ou "anonimo".</summary>
     string Identificador { get; }
 

@@ -20,11 +20,12 @@ public class AuthServiceTests
     private readonly Mock<IGeradorToken> _geradorToken = new();
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
     private readonly Mock<IAuditoriaRegistrador> _auditoria = new();
+    private readonly Mock<IUsuarioAtual> _usuarioAtual = new();
     private readonly AuthService _sut;
 
     public AuthServiceTests()
         => _sut = new AuthService(_usuarios.Object, _hashSenha.Object, _geradorToken.Object,
-            _unitOfWork.Object, _auditoria.Object, NullLogger<AuthService>.Instance);
+            _unitOfWork.Object, _auditoria.Object, _usuarioAtual.Object, NullLogger<AuthService>.Instance);
 
     [Fact]
     public async Task LoginAsync_CredenciaisValidas_DeveEmitirTokenEAuditarLogin()
@@ -124,5 +125,50 @@ public class AuthServiceTests
         // Assert
         await Assert.ThrowsAsync<ConflitoException>(acao);
         _hashSenha.Verify(h => h.Gerar(It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task BuscarUsuarioAtualAsync_TokenValido_DeveRetornarUsuarioDoToken()
+    {
+        // Arrange
+        _usuarioAtual.SetupGet(u => u.Id).Returns(7);
+        _usuarios.Setup(r => r.ObterPorIdAsync(7, It.IsAny<CancellationToken>()))
+                 .ReturnsAsync(EntityBuilder.NovoUsuario(id: 7, perfil: PerfilUsuario.Veterinario, email: "vet@clyvo.com.br"));
+
+        // Act
+        var resultado = await _sut.BuscarUsuarioAtualAsync();
+
+        // Assert
+        Assert.Equal(7, resultado.Id);
+        Assert.Equal(PerfilUsuario.Veterinario, resultado.Perfil);
+    }
+
+    [Fact]
+    public async Task BuscarUsuarioAtualAsync_UsuarioInativado_DeveLancarCredenciaisInvalidas()
+    {
+        // Arrange
+        var usuario = EntityBuilder.NovoUsuario(id: 7);
+        usuario.Desativar();
+        _usuarioAtual.SetupGet(u => u.Id).Returns(7);
+        _usuarios.Setup(r => r.ObterPorIdAsync(7, It.IsAny<CancellationToken>())).ReturnsAsync(usuario);
+
+        // Act
+        var acao = () => _sut.BuscarUsuarioAtualAsync();
+
+        // Assert
+        await Assert.ThrowsAsync<CredenciaisInvalidasException>(acao);
+    }
+
+    [Fact]
+    public async Task BuscarUsuarioAtualAsync_RequisicaoAnonima_DeveLancarCredenciaisInvalidas()
+    {
+        // Arrange
+        _usuarioAtual.SetupGet(u => u.Id).Returns((int?)null);
+
+        // Act
+        var acao = () => _sut.BuscarUsuarioAtualAsync();
+
+        // Assert
+        await Assert.ThrowsAsync<CredenciaisInvalidasException>(acao);
     }
 }

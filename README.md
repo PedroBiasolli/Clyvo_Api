@@ -1,19 +1,12 @@
 # Clyvo Pet Care API
 
-API REST para acompanhamento contínuo da jornada de saúde de cachorros — tutores, pets, veterinários, consultas, carteira de vacinação e motor preventivo de lembretes. Construída no Challenge FIAP 2026 em parceria com a Clyvo VET.
+API REST em .NET 8 para a continuidade do cuidado na saúde de cachorros: tutores, pets, veterinários, consultas, carteira de vacinação e lembretes preventivos (retornos e doses). Challenge FIAP 2026 — Clyvo VET.
 
 [![CI](https://github.com/PedroBiasolli/Clyvo_Api/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/PedroBiasolli/Clyvo_Api/actions/workflows/ci.yml)
-[![Testes](https://img.shields.io/badge/testes-182%20passando-brightgreen?style=flat-square)](#testes-automatizados)
-[![Cobertura](https://img.shields.io/badge/cobertura%20Dom%C3%ADnio%2FAplica%C3%A7%C3%A3o-98%25%20%2F%2097%25-brightgreen?style=flat-square)](#testes-automatizados)
-[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![EF Core](https://img.shields.io/badge/EF%20Core-8.0-512BD4?style=flat-square)](https://learn.microsoft.com/ef/core/)
-[![Oracle](https://img.shields.io/badge/Oracle-19c-F80000?style=flat-square&logo=oracle&logoColor=white)](https://www.oracle.com/database/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
-[![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=flat-square&logo=jsonwebtokens&logoColor=white)](https://jwt.io/)
-[![OpenAPI](https://img.shields.io/badge/OpenAPI-3.0-85EA2D?style=flat-square&logo=swagger&logoColor=black)](https://swagger.io/)
-[![Serilog](https://img.shields.io/badge/Serilog-8-1E90FF?style=flat-square)](https://serilog.net/)
-[![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-1.9-4B5563?style=flat-square)](https://opentelemetry.io/)
-[![xUnit](https://img.shields.io/badge/xUnit-2.9-512BD4?style=flat-square)](https://xunit.net/)
+![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet&logoColor=white)
+![Oracle](https://img.shields.io/badge/Oracle-EF%20Core%208-F80000?style=flat-square&logo=oracle&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=flat-square&logo=mongodb&logoColor=white)
+![Testes](https://img.shields.io/badge/testes-185%20passando-brightgreen?style=flat-square)
 
 ## Integrantes — 2TDSPO
 
@@ -25,269 +18,110 @@ API REST para acompanhamento contínuo da jornada de saúde de cachorros — tut
 | Christian Freitas | RM566098 |
 | Matheus Enrico | RM562532 |
 
----
-
 ## Sumário
 
-1. [O problema](#o-problema)
-2. [Sprint 4 — onde cada requisito está](#sprint-4--onde-cada-requisito-está)
-3. [Arquitetura](#arquitetura)
-4. [Modelo de domínio e regras de negócio](#modelo-de-domínio-e-regras-de-negócio)
-5. [API RESTful](#api-restful)
-6. [Autenticação e autorização (JWT)](#autenticação-e-autorização-jwt)
-7. [Persistência: Oracle + MongoDB](#persistência-oracle--mongodb)
-8. [Monitoramento e observabilidade](#monitoramento-e-observabilidade)
-9. [Testes automatizados](#testes-automatizados)
-10. [Como executar](#como-executar)
-11. [Roteiro de demonstração](#roteiro-de-demonstração)
-12. [Decisões técnicas](#decisões-técnicas)
+1. [Requisitos da Sprint 4](#requisitos-da-sprint-4)
+2. [Arquitetura e código](#1-arquitetura-e-código)
+3. [API RESTful](#2-api-restful)
+4. [Persistência de dados](#3-persistência-de-dados)
+5. [Monitoramento, observabilidade e testes](#4-monitoramento-observabilidade-e-testes)
+6. [Como executar](#como-executar)
 
 ---
 
-## O problema
+## Requisitos da Sprint 4
 
-Hoje o tutor só procura o veterinário quando algo dá errado: sintoma agudo, emergência ou aquela vacina lembrada tarde demais. A jornada fica cheia de buracos — tratamento abandonado, dose esquecida, agravamento evitável, vínculo frágil com a clínica.
-
-A Clyvo Pet Care inverte essa lógica: a clínica passa a ter visão completa do que cada pet precisa, e o tutor recebe o lembrete certo na hora certa. Dois campos são o coração disso — `Consulta.ProximoRetorno` e `Vacina.DataProximaDose` — e alimentam os endpoints do motor preventivo (`/consultas/retornos-proximos/{dias}`, `/vacinas/atrasadas`, `/vacinas/proximas/{dias}`).
-
----
-
-## Sprint 4 — onde cada requisito está
-
-| Requisito | Pts | Como foi atendido | Onde ver |
+| Requisito | Pts | Implementação | Onde está |
 |---|---|---|---|
-| **Clean Architecture com separação de camadas** | 30 | 4 projetos com regra de dependência garantida pelo compilador: `Domain` ← `Application` ← `Infrastructure` / `Api` | [`src/`](src) · [Arquitetura](#arquitetura) |
-| **SOLID e Clean Code** | | Domínio rico (setters privados, fábricas validadas), serviços pequenos e coesos, interfaces segregadas, dependências por abstração | [tabela SOLID](#solid-e-clean-code-na-prática) |
-| **Injeção de Dependência** | | Cada camada expõe seu `AddXxx()`; `Program.cs` é só composição | `Application/DependencyInjection.cs`, `Infrastructure/DependencyInjection.cs`, `Api/Configuration/*` |
-| **Tratamento global de exceções** | | `IExceptionHandler` + ProblemDetails (RFC 7807) com `traceId` e `correlationId`; controllers sem `try/catch` | `Api/ExceptionHandling/GlobalExceptionHandler.cs` |
-| **Swagger/OpenAPI atualizado** | 20 | XML docs de controllers e DTOs, esquema Bearer, cadeado só nos endpoints protegidos, respostas 4xx/5xx documentadas | `/swagger` · `Api/Configuration/SwaggerConfiguration.cs` |
-| **Paginação, ordenação e filtros** | | `pagina`, `tamanhoPagina`, `ordenarPor` (enum validado), `direcao` + filtros por recurso | [Listagens](#paginação-ordenação-e-filtros) |
-| **HATEOAS** | | Links em todos os recursos (`self`, `atualizar`, `remover` e relações) e na paginação (`primeira`, `anterior`, `próxima`, `última`) | [HATEOAS](#hateoas) · `Api/Hateoas/*` |
-| **Autenticação e Autorização JWT** | | Login com hash PBKDF2, JWT HS256, 3 perfis e 3 políticas | [JWT](#autenticação-e-autorização-jwt) |
-| **EF Core + migrations (Oracle)** | 20 | `InitialCreate` + `AdicionarUsuarios` (nova nesta sprint) | `Infrastructure/Persistence/Migrations` |
-| **MongoDB para operações NoSQL** | | Trilha de auditoria: inserção, consulta filtrada/paginada, busca por id e **aggregation pipeline** | `Infrastructure/NoSql/*` · `/api/v1/auditoria` |
-| **Repository concreto** | | `RepositoryBase<T>` + 6 repositórios EF + repositório Mongo + Unit of Work | `Infrastructure/Persistence/Repositories` |
-| **Health Checks** | 20 | `/health`, `/health/live`, `/health/ready` — self, Oracle e MongoDB | [Health checks](#health-checks) |
-| **Logging estruturado** | | Serilog (console + arquivo JSON) com CorrelationId, usuário, máquina, thread | [Logging](#logging-estruturado--serilog) |
-| **Testes unitários e de integração (AAA)** | | **182 testes, todos passando**: 131 casos unitários + 51 de integração com JWT real | [Testes](#testes-automatizados) |
-| **Cobertura de Domínio e Aplicação** | | **Domínio 98,1% · Aplicação 96,6%** de linhas (Coverlet + ReportGenerator); o CI falha abaixo de 70% | `.github/workflows/ci.yml` |
-| **Documentação e README final** | 10 | Este README + Swagger + `.http` de demonstração + scripts SQL comentados | — |
+| Clean Architecture com separação de camadas | 30 | 4 projetos: Domain ← Application ← Infrastructure / Api | `src/` |
+| Princípios SOLID e Clean Code | | Domínio rico, serviços coesos, interfaces segregadas, dependência de abstrações | [SOLID](#solid-e-clean-code) |
+| Injeção de Dependência | | `AddApplication()`, `AddInfrastructure()` e configurações da Api | `*/DependencyInjection.cs`, `Api/Configuration` |
+| Tratamento de exceções global | | `IExceptionHandler` + ProblemDetails (RFC 7807) | `Api/ExceptionHandling` |
+| Swagger/OpenAPI atualizado | 20 | Comentários XML, esquema Bearer, respostas de erro documentadas | `/swagger` |
+| Paginação, ordenação e filtros | | Em todas as listagens | [Listagens](#paginação-ordenação-e-filtros) |
+| HATEOAS nos endpoints de consulta | | Links por recurso e de navegação entre páginas | `Api/Hateoas` |
+| Autenticação e autorização JWT | | Login, 3 perfis e 3 políticas | `/api/v1/auth` |
+| EF Core com migrations (Oracle) | 20 | `InitialCreate` + `AdicionarUsuarios` | `Infrastructure/Persistence/Migrations` |
+| MongoDB para operações NoSQL | | Trilha de auditoria com consulta e aggregation | `Infrastructure/NoSql`, `/api/v1/auditoria` |
+| Repositórios com padrão Repository | | `RepositoryBase<T>`, 6 repositórios EF, 1 MongoDB e Unit of Work | `Infrastructure/Persistence/Repositories` |
+| Health Checks | 20 | `/health`, `/health/live`, `/health/ready` | `Api/Configuration/ObservabilidadeConfiguration.cs` |
+| Logging estruturado | | Serilog com CorrelationId | `appsettings.json` (seção `Serilog`) |
+| Testes unitários e de integração (AAA, xUnit) | | 134 unitários + 51 de integração, todos passando | `tests/` |
+| Cobertura de Domínio e Aplicação | | Domínio **98,1%** · Aplicação **96,6%** | CI (`.github/workflows/ci.yml`) |
+| Documentação e README final | 10 | Este README, Swagger e scripts SQL | — |
 
 ---
 
-## Arquitetura
+## 1. Arquitetura e código
 
-### Camadas e regra de dependência
+### Camadas
 
 ```mermaid
 flowchart LR
-    subgraph Api["Clyvo.PetCare.Api — Apresentação"]
-        C[Controllers + HATEOAS]
-        EH[GlobalExceptionHandler]
-        SEC[JWT + Políticas]
-    end
-    subgraph Infra["Clyvo.PetCare.Infrastructure"]
-        EF[EF Core / Oracle<br/>Repositórios + UoW + Migrations]
-        MG[MongoDB<br/>Auditoria]
-        JWT[JWT + PBKDF2]
-    end
-    subgraph App["Clyvo.PetCare.Application — Casos de uso"]
-        S[Services]
-        D[DTOs + Mapeamentos]
-        AB[Abstrações<br/>IGeradorToken, IHashSenha, IUsuarioAtual]
-    end
-    subgraph Dom["Clyvo.PetCare.Domain — Núcleo"]
-        E[Entidades ricas]
-        R[Contratos de repositório<br/>IUnitOfWork]
-        Q[Query Objects / Filtros]
-    end
-
-    Api --> App
-    Api -. composition root .-> Infra
+    Api["Api<br/>Controllers · HATEOAS · JWT · Exceções"] --> App["Application<br/>Casos de uso · DTOs · Abstrações"]
+    Api -. composição (DI) .-> Infra["Infrastructure<br/>EF Core/Oracle · MongoDB · JWT · Hash"]
     Infra --> App
-    App --> Dom
+    App --> Dom["Domain<br/>Entidades · Regras · Contratos de repositório"]
 ```
 
-As setas apontam sempre para dentro. O **Domínio não referencia nada** — nem EF, nem ASP.NET. A **Aplicação** só conhece o Domínio e abstrações; EF Core, MongoDB e JWT entram pelas interfaces (`IRepository`, `IUnitOfWork`, `IAuditoriaRepository`, `IGeradorToken`, `IHashSenha`), implementadas na **Infraestrutura**. A **Api** referencia a Infraestrutura apenas para registrar o DI.
-
-### Estrutura
-
-```
-DotNet_Challenge/
-├── src/
-│   ├── Clyvo.PetCare.Domain/            # zero dependências externas
-│   │   ├── Common/          EntityBase, DomainGuard (cláusulas de guarda), ResultadoPaginado
-│   │   ├── Entities/        Tutor, Pet, Veterinario, Consulta, Vacina, Usuario, RegistroAuditoria
-│   │   ├── Enums/           Porte, Sexo, Tipo/Status de consulta, PerfilUsuario, AcaoAuditoria
-│   │   ├── Exceptions/      DomainException
-│   │   ├── Queries/         Filtros (Query Objects) + enums de ordenação
-│   │   └── Repositories/    IRepository<T>, repositórios específicos, IUnitOfWork, IAuditoriaRepository
-│   │
-│   ├── Clyvo.PetCare.Application/
-│   │   ├── Abstractions/    IUsuarioAtual, IGeradorToken, IHashSenha
-│   │   ├── DTOs/            entrada (Criar/Atualizar), saída (Response com Links), Query DTOs
-│   │   ├── Exceptions/      RecursoNaoEncontrado, Conflito, RegraDeNegocio, CredenciaisInvalidas
-│   │   ├── Mappings/        entidade ↔ DTO, query string ↔ filtro
-│   │   └── Services/        casos de uso (Tutor, Pet, Veterinario, Consulta, Vacina, Auth, Auditoria)
-│   │
-│   ├── Clyvo.PetCare.Infrastructure/
-│   │   ├── Persistence/     AppDbContext, Mappings (Fluent API), Repositories, UnitOfWork, Migrations, Seed
-│   │   ├── NoSql/           MongoDbContext, AuditoriaDocument, AuditoriaRepository, índices
-│   │   ├── Security/        JwtGeradorToken, HashSenhaPbkdf2, JwtSettings
-│   │   └── HealthChecks/    MongoDbHealthCheck
-│   │
-│   └── Clyvo.PetCare.Api/
-│       ├── Controllers/     7 controllers finos (herdam ApiControllerBase)
-│       ├── Hateoas/         ILinkService (LinkGenerator), QueryStringHelper
-│       ├── ExceptionHandling/  GlobalExceptionHandler → ProblemDetails
-│       ├── Security/        políticas por perfil, IUsuarioAtual a partir das claims
-│       ├── Middlewares/     CorrelationIdMiddleware
-│       ├── Configuration/   Swagger, JWT, Serilog/OpenTelemetry/HealthChecks, pipeline
-│       └── Program.cs       composition root (≈ 20 linhas úteis)
-│
-├── tests/
-│   ├── Clyvo.PetCare.UnitTests/         domínio, serviços (Moq), mapeamentos, handler, controller
-│   └── Clyvo.PetCare.IntegrationTests/  pipeline HTTP completo com WebApplicationFactory + JWT real
-│
-├── scripts/                 DDL Oracle, seed (inclui usuários) e cleanup
-├── docker-compose.yml       MongoDB + mongo-express
-├── coverlet.runsettings     configuração de cobertura
-└── .github/workflows/ci.yml build + testes + cobertura mínima
-```
-
-### SOLID e Clean Code na prática
-
-| Princípio | Onde aparece |
-|---|---|
-| **S** — Responsabilidade única | Controller só traduz HTTP; serviço orquestra o caso de uso; entidade guarda as regras; repositório só persiste; `GlobalExceptionHandler` só traduz exceções; `LinkService` só gera URLs. |
-| **O** — Aberto/fechado | Novos agregados reutilizam `RepositoryBase<T>` sobrescrevendo apenas `ComRelacionamentos`; nova exceção = uma linha na tabela de `Classificar`. |
-| **L** — Substituição de Liskov | Todos os repositórios são intercambiáveis pelos contratos; nos testes de integração o `AuditoriaRepository` (Mongo) é trocado por um em memória sem alterar nenhum serviço. |
-| **I** — Segregação de interfaces | Auditoria separada em `IAuditoriaRegistrador` (escrita, usada pelos serviços) e `IAuditoriaConsultaService` (leitura, usada pelo controller). |
-| **D** — Inversão de dependência | A Aplicação depende de `IUnitOfWork`, `IGeradorToken`, `IHashSenha`, `IUsuarioAtual` — nunca de EF, JWT ou `HttpContext`. |
-| **Clean Code** | Nomes de domínio em português consistentes; métodos curtos; nenhuma entidade exposta pela API; sem *magic numbers* (constantes `TamanhoMaximo`, `JanelaPreventiva`); `CancellationToken` de ponta a ponta. |
-
----
-
-## Modelo de domínio e regras de negócio
-
-```mermaid
-erDiagram
-    TUTOR ||--o{ PET : "é responsável por"
-    PET ||--o{ CONSULTA : "realiza"
-    PET ||--o{ VACINA : "recebe"
-    VETERINARIO ||--o{ CONSULTA : "atende"
-    VETERINARIO |o--o{ VACINA : "aplica"
-    USUARIO {
-        int Id
-        string Email
-        string SenhaHash
-        PerfilUsuario Perfil
-    }
-```
-
-As entidades têm **setters privados** e só mudam por métodos que protegem as invariantes (`Tutor.Criar`, `Pet.Atualizar`, `Consulta.Agendar`...). Regras implementadas:
-
-| Regra | Onde | HTTP |
+| Projeto | Responsabilidade | Depende de |
 |---|---|---|
-| CPF normalizado para 11 dígitos (aceita pontuação) e único | `Tutor` / `TutorService` | 422 / 409 |
-| UF com 2 letras, e-mail válido, tamanhos máximos | `DomainGuard` | 422 |
-| Data de nascimento do pet e de aplicação da vacina não podem ser futuras | `Pet`, `Vacina` | 422 |
-| Peso entre 0,1 e 120 kg; porte/sexo/tipo/status precisam existir no enum | `Pet`, `Consulta` | 422 |
-| Microchip único entre pets | `PetService` | 409 |
-| Veterinário inativo não recebe agendamento | `Consulta.Agendar` | 422 |
-| Consulta **Realizada** exige diagnóstico; **Cancelada** não é reaberta | `Consulta.Atualizar` | 422 |
-| Retorno posterior à consulta; próxima dose posterior à aplicação; valor ≥ 0 | `Consulta`, `Vacina` | 422 |
-| Consulta realizada não é removida (faz parte do prontuário) | `Consulta.GarantirQuePodeSerRemovida` | 422 |
-| Tutor com pets, pet com histórico e veterinário com consultas não são removidos | serviços | 422 |
+| `Clyvo.PetCare.Domain` | Entidades com regras de negócio, exceção de domínio, filtros de consulta e contratos de repositório | nada |
+| `Clyvo.PetCare.Application` | Casos de uso (serviços), DTOs, mapeamentos e abstrações (`IUnitOfWork`, `IGeradorToken`, `IHashSenha`, `IUsuarioAtual`) | Domain |
+| `Clyvo.PetCare.Infrastructure` | EF Core + Oracle, repositórios, Unit of Work, migrations, MongoDB, JWT, hash de senha, seed e health check do MongoDB | Application |
+| `Clyvo.PetCare.Api` | Controllers, HATEOAS, autenticação/autorização, tratamento de exceções, Swagger e observabilidade | Application (Infrastructure só para o DI) |
 
----
+Como as camadas são projetos separados, o compilador impede que o Domínio ou a Aplicação usem EF Core, MongoDB ou ASP.NET.
 
-## API RESTful
+### SOLID e Clean Code
 
-Todas as rotas ficam sob `/api/v1`. Leituras exigem autenticação; escrita e remoção dependem do perfil.
-
-| Recurso | Endpoints | Escrita | Remoção |
-|---|---|---|---|
-| **Auth** `/auth` | `POST login` (público) · `GET me` · `POST usuarios` · `GET usuarios/{id}` | Admin | — |
-| **Tutores** `/tutores` | `GET` · `GET {id}` · `GET cpf/{cpf}` · `POST` · `PUT {id}` · `DELETE {id}` | Admin, Veterinário, Atendente | Admin |
-| **Pets** `/pets` | `GET` · `GET {id}` · `GET tutor/{tutorId}` · `GET microchip/{n}` · `POST` · `PUT` · `DELETE` | Admin, Veterinário, Atendente | Admin |
-| **Veterinários** `/veterinarios` | `GET` · `GET {id}` · `GET crmv/{crmv}` · `POST` · `PUT` · `DELETE` | Admin | Admin |
-| **Consultas** `/consultas` | `GET` · `GET {id}` · `GET pet/{petId}` · `GET retornos-proximos/{dias}` · `POST` · `PUT` · `DELETE` | agendar: todos · evoluir: Admin, Veterinário | Admin |
-| **Vacinas** `/vacinas` | `GET` · `GET {id}` · `GET pet/{petId}` · `GET atrasadas` · `GET proximas/{dias}` · `POST` · `PUT` · `DELETE` | Admin, Veterinário | Admin |
-| **Auditoria** `/auditoria` | `GET` · `GET {id}` · `GET resumo` | — | somente Admin lê |
-
-São **41 endpoints de negócio** + `/health`, `/health/live`, `/health/ready` e `/metrics`.
-
-### Paginação, ordenação e filtros
-
-Todas as listagens aceitam `pagina` (≥ 1), `tamanhoPagina` (1–100), `ordenarPor` e `direcao` (`Asc`/`Desc`). `ordenarPor` é um enum por recurso — valores inválidos retornam **400** já no model binding, e a ordenação sempre desempata por `Id` para a paginação ser estável.
-
-| Recurso | Filtros | `ordenarPor` (padrão em negrito) |
-|---|---|---|
-| Tutores | `nome`, `cidade` | **Nome**, Cidade, DataCadastro |
-| Pets | `nome`, `raca`, `porte`, `tutorId` | **Nome**, Raca, DataNascimento, PesoKg, DataCadastro |
-| Veterinários | `nome`, `especialidade`, `ativo` | **Nome**, Especialidade, DataCadastro |
-| Consultas | `tipo`, `status`, `petId`, `veterinarioId`, `dataInicio`, `dataFim` | **DataHora** (desc), Tipo, Status, ProximoRetorno |
-| Vacinas | `nome`, `petId` | **DataAplicacao** (desc), DataProximaDose, Nome |
-| Auditoria | `entidade`, `entidadeId`, `acao`, `usuario`, `dataInicio`, `dataFim` | data (desc) |
-
-```http
-GET /api/v1/pets?porte=Grande&ordenarPor=PesoKg&direcao=Desc&pagina=1&tamanhoPagina=10
-```
-
-### HATEOAS
-
-Cada recurso traz as ações possíveis a partir dele; as páginas trazem a navegação **preservando filtros e ordenação**:
-
-```json
-{
-  "itens": [
-    {
-      "id": 1,
-      "nome": "Thor",
-      "porte": "Grande",
-      "tutorId": 1,
-      "tutorNome": "Mariana Souza",
-      "links": [
-        { "href": "http://localhost:5000/api/v1/pets/1",          "rel": "self",      "metodo": "GET" },
-        { "href": "http://localhost:5000/api/v1/pets/1",          "rel": "atualizar", "metodo": "PUT" },
-        { "href": "http://localhost:5000/api/v1/pets/1",          "rel": "remover",   "metodo": "DELETE" },
-        { "href": "http://localhost:5000/api/v1/tutores/1",       "rel": "tutor",     "metodo": "GET" },
-        { "href": "http://localhost:5000/api/v1/consultas/pet/1", "rel": "consultas", "metodo": "GET" },
-        { "href": "http://localhost:5000/api/v1/vacinas/pet/1",   "rel": "vacinas",   "metodo": "GET" }
-      ]
-    }
-  ],
-  "pagina": 1,
-  "tamanhoPagina": 10,
-  "totalRegistros": 23,
-  "totalPaginas": 3,
-  "temPaginaAnterior": false,
-  "temProximaPagina": true,
-  "links": [
-    { "href": "http://localhost:5000/api/v1/pets?porte=Grande&ordenarPor=PesoKg&direcao=Desc&pagina=1&tamanhoPagina=10", "rel": "self", "metodo": "GET" },
-    { "href": "...pagina=1...", "rel": "primeira-pagina", "metodo": "GET" },
-    { "href": "...pagina=2...", "rel": "proxima-pagina",  "metodo": "GET" },
-    { "href": "...pagina=3...", "rel": "ultima-pagina",   "metodo": "GET" }
-  ]
-}
-```
-
-As URLs são geradas pelo `LinkGenerator` do roteamento — nunca concatenadas à mão — então continuam corretas se as rotas mudarem.
-
-### Erros padronizados (ProblemDetails — RFC 7807)
-
-O `GlobalExceptionHandler` é o único lugar que traduz exceções em HTTP:
-
-| Exceção | Status |
+| Princípio | Aplicação no projeto |
 |---|---|
-| Validação do DTO (DataAnnotations) | **400** `ValidationProblemDetails` |
-| `CredenciaisInvalidasException` / token ausente ou inválido | **401** |
-| Perfil sem permissão | **403** |
-| `RecursoNaoEncontradoException` / rota inexistente | **404** |
-| `ConflitoException` (CPF, CRMV, e-mail, microchip duplicados; violação de integridade no banco) | **409** |
-| `DomainException` / `RegraDeNegocioException` | **422** |
-| Qualquer outra | **500** (sem detalhes internos fora de Development) |
+| Responsabilidade única | Controller traduz HTTP, serviço orquestra o caso de uso, entidade valida as regras, repositório persiste, `GlobalExceptionHandler` traduz erros |
+| Aberto/fechado | Novos repositórios herdam `RepositoryBase<T>` e só definem seus `Include`s e consultas |
+| Substituição de Liskov | Implementações trocáveis pelos contratos (nos testes, o repositório MongoDB é substituído por um em memória sem alterar os serviços) |
+| Segregação de interfaces | Auditoria dividida em `IAuditoriaRegistrador` (escrita) e `IAuditoriaConsultaService` (leitura) |
+| Inversão de dependência | A Aplicação depende só de interfaces; EF Core, MongoDB, JWT e `HttpContext` ficam nas camadas externas |
+| Clean Code | Entidades com setters privados e métodos de fábrica validados, constantes em vez de números mágicos, nenhuma entidade exposta pela API, `CancellationToken` de ponta a ponta |
+
+### Regras de negócio (no domínio)
+
+| Regra | HTTP |
+|---|---|
+| CPF com 11 dígitos (aceita pontuação) e único; CRMV, e-mail de usuário e microchip únicos | 422 / 409 |
+| Nascimento do pet e aplicação da vacina não podem ser datas futuras | 422 |
+| Veterinário inativo não recebe agendamento | 422 |
+| Consulta realizada exige diagnóstico; consulta cancelada não é reaberta | 422 |
+| Retorno posterior à consulta; próxima dose posterior à aplicação; valor cobrado ≥ 0 | 422 |
+| Não remove: consulta realizada, tutor com pets, pet com histórico, veterinário com consultas | 422 |
+
+### Injeção de dependência
+
+O `Program.cs` só faz a composição:
+
+```csharp
+builder.Services
+    .AddApplication()                                              // casos de uso
+    .AddInfrastructure(builder.Configuration, builder.Environment) // Oracle, MongoDB, JWT, hash
+    .AddApresentacao()                                             // controllers, ProblemDetails, HATEOAS
+    .AddSegurancaJwt()                                             // autenticação e autorização
+    .AddDocumentacaoSwagger()                                      // OpenAPI
+    .AddObservabilidade(builder.Environment);                      // health checks + OpenTelemetry
+```
+
+### Tratamento global de exceções
+
+O `GlobalExceptionHandler` converte toda exceção em ProblemDetails (RFC 7807). Os controllers não têm `try/catch`.
+
+| Situação | Status |
+|---|---|
+| Dados inválidos no corpo ou na query | 400 |
+| Login inválido, token ausente ou expirado | 401 |
+| Perfil sem permissão | 403 |
+| Recurso ou rota inexistente | 404 |
+| Registro duplicado ou violação de integridade | 409 |
+| Regra de negócio violada | 422 |
+| Erro inesperado (sem detalhes internos fora de Development) | 500 |
 
 ```json
 {
@@ -303,54 +137,115 @@ O `GlobalExceptionHandler` é o único lugar que traduz exceções em HTTP:
 
 ---
 
-## Autenticação e autorização (JWT)
+## 2. API RESTful
 
-```mermaid
-sequenceDiagram
-    participant Cliente
-    participant API
-    participant Oracle
-    Cliente->>API: POST /api/v1/auth/login {email, senha}
-    API->>Oracle: busca usuário por e-mail
-    API->>API: verifica hash PBKDF2 (100 mil iterações)
-    API-->>Cliente: 200 { accessToken, expiraEmUtc, usuario }
-    Cliente->>API: GET /api/v1/pets  (Authorization: Bearer ...)
-    API->>API: valida assinatura, emissor, audiência e expiração
-    API-->>Cliente: 200 (ou 401 / 403)
+Documentação interativa em **`/swagger`** (a raiz `/` redireciona para lá). Rotas sob `/api/v1`:
+
+| Recurso | Endpoints |
+|---|---|
+| `auth` | `POST login` · `GET me` · `POST usuarios` · `GET usuarios/{id}` |
+| `tutores` | `GET` · `GET {id}` · `GET cpf/{cpf}` · `POST` · `PUT {id}` · `DELETE {id}` |
+| `pets` | `GET` · `GET {id}` · `GET tutor/{tutorId}` · `GET microchip/{microchip}` · `POST` · `PUT {id}` · `DELETE {id}` |
+| `veterinarios` | `GET` · `GET {id}` · `GET crmv/{crmv}` · `POST` · `PUT {id}` · `DELETE {id}` |
+| `consultas` | `GET` · `GET {id}` · `GET pet/{petId}` · `GET retornos-proximos/{dias}` · `POST` · `PUT {id}` · `DELETE {id}` |
+| `vacinas` | `GET` · `GET {id}` · `GET pet/{petId}` · `GET atrasadas` · `GET proximas/{dias}` · `POST` · `PUT {id}` · `DELETE {id}` |
+| `auditoria` | `GET` · `GET {id}` · `GET resumo` |
+
+### Paginação, ordenação e filtros
+
+Toda listagem aceita `pagina` (≥ 1), `tamanhoPagina` (1 a 100), `ordenarPor` e `direcao` (`Asc` ou `Desc`). Valores inválidos retornam 400.
+
+| Recurso | Filtros | `ordenarPor` (padrão primeiro) |
+|---|---|---|
+| Tutores | `nome`, `cidade` | Nome, Cidade, DataCadastro |
+| Pets | `nome`, `raca`, `porte`, `tutorId` | Nome, Raca, DataNascimento, PesoKg, DataCadastro |
+| Veterinários | `nome`, `especialidade`, `ativo` | Nome, Especialidade, DataCadastro |
+| Consultas | `tipo`, `status`, `petId`, `veterinarioId`, `dataInicio`, `dataFim` | DataHora (desc), Tipo, Status, ProximoRetorno |
+| Vacinas | `nome`, `petId` | DataAplicacao (desc), DataProximaDose, Nome |
+| Auditoria | `entidade`, `entidadeId`, `acao`, `usuario`, `dataInicio`, `dataFim` | data (desc) |
+
+```http
+GET /api/v1/pets?porte=Grande&ordenarPor=PesoKg&direcao=Desc&pagina=1&tamanhoPagina=10
 ```
 
-- **Senhas**: nunca armazenadas — apenas o hash PBKDF2-HMAC-SHA512 do ASP.NET Core Identity.
-- **Token**: HS256 com `sub`, `email`, `name`, `role` e `jti`; validade configurável (`Jwt:ExpiracaoMinutos`, padrão 120 min). A chave precisa ter ≥ 256 bits — a API valida isso na inicialização.
-- **Perfis e políticas**:
+### HATEOAS
 
-| Política | Perfis | Aplicada em |
+Cada recurso traz suas ações e relações; cada página traz a navegação mantendo filtros e ordenação:
+
+```json
+{
+  "itens": [
+    {
+      "id": 1,
+      "nome": "Thor",
+      "tutorId": 1,
+      "links": [
+        { "href": "http://localhost:5000/api/v1/pets/1",          "rel": "self",      "metodo": "GET" },
+        { "href": "http://localhost:5000/api/v1/pets/1",          "rel": "atualizar", "metodo": "PUT" },
+        { "href": "http://localhost:5000/api/v1/pets/1",          "rel": "remover",   "metodo": "DELETE" },
+        { "href": "http://localhost:5000/api/v1/tutores/1",       "rel": "tutor",     "metodo": "GET" },
+        { "href": "http://localhost:5000/api/v1/consultas/pet/1", "rel": "consultas", "metodo": "GET" },
+        { "href": "http://localhost:5000/api/v1/vacinas/pet/1",   "rel": "vacinas",   "metodo": "GET" }
+      ]
+    }
+  ],
+  "pagina": 1,
+  "tamanhoPagina": 10,
+  "totalRegistros": 23,
+  "totalPaginas": 3,
+  "links": [
+    { "href": "http://localhost:5000/api/v1/pets?porte=Grande&ordenarPor=PesoKg&direcao=Desc&pagina=1&tamanhoPagina=10", "rel": "self", "metodo": "GET" },
+    { "href": "...&pagina=1...", "rel": "primeira-pagina", "metodo": "GET" },
+    { "href": "...&pagina=2...", "rel": "proxima-pagina",  "metodo": "GET" },
+    { "href": "...&pagina=3...", "rel": "ultima-pagina",   "metodo": "GET" }
+  ]
+}
+```
+
+### Autenticação e autorização (JWT)
+
+1. `POST /api/v1/auth/login` com e-mail e senha devolve o `accessToken`.
+2. No Swagger, clique em **Authorize** e cole o token.
+
+As senhas são guardadas apenas como hash PBKDF2 (ASP.NET Core Identity). O token é HS256, com validade de 120 minutos. Leituras exigem apenas login; escrita depende do perfil:
+
+| Política | Perfis | Uso |
 |---|---|---|
-| `Cadastro` | Admin, Veterinário, Atendente | criar/editar tutores e pets, agendar consultas |
-| `Clinica` | Admin, Veterinário | evoluir consulta, registrar/corrigir vacinas |
-| `Administracao` | Admin | remoções, veterinários, usuários, auditoria |
+| `Cadastro` | Admin, Veterinário, Atendente | cadastrar/editar tutores e pets, agendar consultas |
+| `Clinica` | Admin, Veterinário | evoluir consultas, registrar vacinas |
+| `Administracao` | Admin | remoções, veterinários, usuários e auditoria |
 
-- **Primeiro acesso**: na subida, a API cria o administrador definido em `SeedAdmin` (`admin@clyvo.com.br` / `Clyvo@2026`) se ele ainda não existir.
-- **No Swagger**: faça o login, copie o `accessToken`, clique em **Authorize** e cole só o token. O Swagger mostra cadeado apenas nos endpoints protegidos.
+Na primeira execução a API cria o administrador **`admin@clyvo.com.br`** / **`Clyvo@2026`** (seção `SeedAdmin` do `appsettings.json`).
 
 ---
 
-## Persistência: Oracle + MongoDB
+## 3. Persistência de dados
 
-### Relacional — EF Core 8 + Oracle 19c
+### Oracle — Entity Framework Core 8
 
-- Mapeamento 100% via **Fluent API** (`Persistence/Mappings`) — o domínio não tem atributos de banco.
-- **Migrations versionadas**:
+- Mapeamento por Fluent API (`Infrastructure/Persistence/Mappings`).
+- Migrations:
 
 | Migration | Conteúdo |
 |---|---|
-| `20260524150903_InitialCreate` | `TB_TUTOR`, `TB_PET`, `TB_VETERINARIO`, `TB_CONSULTA`, `TB_VACINA`, índices e FKs |
-| `20261030150000_AdicionarUsuarios` | `TB_USUARIO` com índice único em `DS_EMAIL` (Sprint 4) |
+| `20260524150903_InitialCreate` | `TB_TUTOR`, `TB_PET`, `TB_VETERINARIO`, `TB_CONSULTA`, `TB_VACINA` |
+| `20261030150000_AdicionarUsuarios` | `TB_USUARIO` (autenticação) |
 
-- **Repository + Unit of Work**: `RepositoryBase<T>` implementa o CRUD genérico; cada repositório concreto adiciona consultas do seu agregado (filtros, ordenação, paginação, `Include`s). Leituras de listagem usam `AsNoTracking`. O `UnitOfWork` confirma tudo numa transação e converte `DbUpdateException` em **409**.
+- Padrão Repository: `RepositoryBase<T>` com o CRUD genérico e repositórios concretos para Tutor, Pet, Veterinário, Consulta, Vacina e Usuário. A `UnitOfWork` confirma as alterações numa transação.
 
-### NoSQL — MongoDB (trilha de auditoria)
+```mermaid
+erDiagram
+    TB_TUTOR ||--o{ TB_PET : possui
+    TB_PET ||--o{ TB_CONSULTA : realiza
+    TB_PET ||--o{ TB_VACINA : recebe
+    TB_VETERINARIO ||--o{ TB_CONSULTA : atende
+    TB_VETERINARIO |o--o{ TB_VACINA : aplica
+    TB_USUARIO
+```
 
-Toda criação, alteração, remoção e login gera um documento na coleção `auditoria` — com quem fez, quando, o `correlationId` da requisição e o **snapshot do recurso** como subdocumento livre:
+### MongoDB — trilha de auditoria
+
+Cada criação, alteração, remoção e login gera um documento na coleção `auditoria`, com usuário, data, correlation id e um snapshot do registro:
 
 ```json
 {
@@ -361,175 +256,93 @@ Toda criação, alteração, remoção e login gera um documento na coleção `a
   "usuario": "ana.lima@clyvo.com.br",
   "dataHoraUtc": { "$date": "2026-10-30T15:42:10.512Z" },
   "correlationId": "8b0c6c0f2b2f4f1e9e1a0e4f5d6c7b8a",
-  "dados": { "id": 12, "status": "Realizada", "diagnostico": "Otite leve", "proximoRetorno": "2026-11-14T09:00:00" }
+  "dados": { "id": 12, "status": "Realizada", "diagnostico": "Otite leve" }
 }
 ```
 
-Por que NoSQL aqui: é um log *append-only*, de alto volume, cujo formato varia por entidade — o caso clássico de documento flexível. O Oracle fica com o que exige integridade referencial.
-
-| Operação Mongo | Endpoint |
+| Operação MongoDB | Endpoint |
 |---|---|
 | `InsertOne` | automático em cada escrita |
-| `Find` com filtros, `Sort`, `Skip`/`Limit` e `CountDocuments` | `GET /api/v1/auditoria` |
+| `Find` com filtros, ordenação, paginação e contagem | `GET /api/v1/auditoria` |
 | `Find` por `_id` | `GET /api/v1/auditoria/{id}` |
-| **Aggregation** (`$match` → `$group` → `$sort`) | `GET /api/v1/auditoria/resumo` |
+| Aggregation (`$match`, `$group`, `$sort`) | `GET /api/v1/auditoria/resumo` |
 
-Índices (`entidade+entidadeId`, `dataHoraUtc`, `usuario`) são criados na inicialização. A gravação da auditoria é **tolerante a falhas**: se o Mongo cair, a operação de negócio (já confirmada no Oracle) não é desfeita — a falha vai para o log e o health check marca o MongoDB como `Degraded`.
+Os índices da coleção são criados na inicialização. Se o MongoDB estiver fora do ar, a operação no Oracle não é desfeita: a falha vai para o log e o health check marca o MongoDB como `Degraded`.
 
 ---
 
-## Monitoramento e observabilidade
+## 4. Monitoramento, observabilidade e testes
 
 ### Health checks
 
-| Endpoint | Uso | Verifica |
+| Endpoint | Verifica |
+|---|---|
+| `GET /health` | API, Oracle e MongoDB |
+| `GET /health/live` | apenas a API (liveness) |
+| `GET /health/ready` | Oracle e MongoDB (readiness) |
+
+### Logging estruturado
+
+Serilog com saída no console e em arquivo diário JSON (`logs/clyvo-api-AAAAMMDD.log`). Cada linha tem `CorrelationId`, máquina, thread e aplicação, e cada requisição registra método, rota, status, duração e usuário. O header `X-Correlation-Id` é devolvido em toda resposta e aparece nos logs, nos erros e na auditoria. Métricas no formato Prometheus em `GET /metrics` (OpenTelemetry).
+
+### Testes (xUnit, padrão AAA)
+
+| Projeto | Testes | Cobertura |
 |---|---|---|
-| `GET /health` | visão completa | `self` + `oracle-database` + `mongodb` |
-| `GET /health/live` | liveness probe | apenas o processo (`self`) |
-| `GET /health/ready` | readiness probe | Oracle (**Unhealthy** se cair) e MongoDB (**Degraded** se cair) |
+| `Clyvo.PetCare.UnitTests` | 134 | Regras do domínio, serviços com Moq, mapeamentos, tratamento de exceções, controller e HATEOAS |
+| `Clyvo.PetCare.IntegrationTests` | 51 | Pipeline HTTP completo com `WebApplicationFactory` e JWT real: autenticação, permissões, validações, paginação, HATEOAS, fluxo clínico, auditoria e health checks |
 
-```json
-{
-  "status": "Healthy",
-  "totalDuration": "00:00:00.0241",
-  "entries": {
-    "self":            { "status": "Healthy", "description": "API respondendo" },
-    "oracle-database": { "status": "Healthy" },
-    "mongodb":         { "status": "Healthy", "description": "MongoDB respondendo ao ping." }
-  }
-}
-```
-
-### Logging estruturado — Serilog
-
-- **Console** legível para desenvolvimento e **arquivo diário em JSON compacto** (`logs/clyvo-api-AAAAMMDD.log`, 14 dias de retenção) pronto para Elastic, Loki ou Seq.
-- Toda linha carrega `CorrelationId`, `MachineName`, `ThreadId` e `Application`; o log de requisição inclui método, rota, status, duração e usuário.
-- Os serviços registram eventos de negócio com propriedades estruturadas, por exemplo: `Consulta {ConsultaId} atualizada ({StatusAnterior} → {StatusAtual})`.
-- O header `X-Correlation-Id` é aceito do cliente (ou gerado), devolvido na resposta e gravado nos logs, nos ProblemDetails e na auditoria — dá para seguir uma requisição de ponta a ponta.
-
-### Tracing e métricas — OpenTelemetry
-
-Instrumentação de ASP.NET Core, HttpClient, EF Core, runtime e processo. Traces exportados para o console; métricas no formato **Prometheus** em `GET /metrics`.
-
----
-
-## Testes automatizados
-
-Padrão **AAA** (Arrange, Act, Assert) e nomenclatura `Metodo_Cenario_ResultadoEsperado` em todos os testes.
-
-| Projeto | Métodos | O que cobre |
-|---|---|---|
-| `Clyvo.PetCare.UnitTests` | **105** (131 casos com `Theory`) | Domínio (todas as regras das entidades, guardas, filtros), serviços de aplicação com Moq (sucesso, 404, 409, 422, auditoria, Unit of Work), mapeamentos, `GlobalExceptionHandler`, controller com HATEOAS e `QueryStringHelper` |
-| `Clyvo.PetCare.IntegrationTests` | **51** | Pipeline HTTP completo com `WebApplicationFactory`: login JWT real, 401/403 por perfil, validação 400, ProblemDetails, paginação/ordenação/filtros, links HATEOAS, jornada clínica (agendar → evoluir → retorno → vacinas), auditoria, health checks, métricas, correlation id e Swagger |
-
-Os testes de integração **não dependem de Oracle nem de MongoDB**: a fábrica troca o Oracle por EF Core InMemory e o repositório Mongo por um em memória — todo o resto (JWT, políticas, middlewares, handler) é o código de produção.
-
-```bash
-dotnet test                                              # tudo
-dotnet test tests/Clyvo.PetCare.UnitTests                # só unitários
-dotnet test tests/Clyvo.PetCare.IntegrationTests         # só integração
-
-# cobertura (Domínio, Aplicação, Infraestrutura e Api; migrations excluídas)
-dotnet test --settings coverlet.runsettings --collect:"XPlat Code Coverage" --results-directory ./TestResults
-dotnet tool install -g dotnet-reportgenerator-globaltool
-reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:coverage -reporttypes:Html
-```
-
-O workflow `.github/workflows/ci.yml` roda build, todos os testes e gera o relatório de cobertura a cada push; o job **falha se a cobertura de linhas de Domínio ou de Aplicação ficar abaixo de 70%**.
-
-### Resultado no CI (GitHub Actions)
+Resultado no GitHub Actions (executado a cada push):
 
 | Verificação | Resultado |
 |---|---|
-| Build da solução | ✅ 0 erros · 0 avisos |
-| Testes unitários | ✅ 131 / 131 |
-| Testes de integração | ✅ 51 / 51 |
-| Cobertura de linhas — **Domínio** | ✅ **98,1%** |
-| Cobertura de linhas — **Aplicação** | ✅ **96,6%** |
+| Build | ✅ 0 erros · 0 avisos |
+| Testes | ✅ 185 de 185 passando |
+| Cobertura de linhas — Domínio | ✅ 98,1% |
+| Cobertura de linhas — Aplicação | ✅ 96,6% |
 
-O relatório HTML completo fica disponível como artefato (`cobertura-e-resultados`) em cada execução da aba **Actions**.
+O CI falha se a cobertura de Domínio ou de Aplicação ficar abaixo de 70%. Os testes de integração usam EF Core InMemory e um repositório de auditoria em memória, então não precisam de Oracle nem MongoDB.
+
+```bash
+dotnet test
+dotnet test --settings coverlet.runsettings --collect:"XPlat Code Coverage"
+```
 
 ---
 
 ## Como executar
 
-### Pré-requisitos
-
-- .NET 8 SDK
-- Acesso ao Oracle da FIAP (ou um Oracle 19c local)
-- Docker (para o MongoDB) — ou um MongoDB local/Atlas
-
-### Passo a passo
+**Pré-requisitos:** .NET 8 SDK, acesso ao Oracle da FIAP e Docker (para o MongoDB).
 
 ```bash
 git clone https://github.com/PedroBiasolli/Clyvo_Api.git
 cd Clyvo_Api
 
-# 1. MongoDB (auditoria) + painel em http://localhost:8081
+# 1. MongoDB
 docker compose up -d
 
-# 2. Connection string do Oracle sem expor a senha no Git
-cd src/Clyvo.PetCare.Api
-dotnet user-secrets init
-dotnet user-secrets set "ConnectionStrings:OracleFiap" "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=oracle.fiap.com.br)(PORT=1521))(CONNECT_DATA=(SID=ORCL)));User Id=RMXXXXX;Password=SUA_SENHA;"
-cd ../..
+# 2. Connection string do Oracle (fora do Git)
+dotnet user-secrets --project src/Clyvo.PetCare.Api set "ConnectionStrings:OracleFiap" "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=oracle.fiap.com.br)(PORT=1521))(CONNECT_DATA=(SID=ORCL)));User Id=RMXXXXX;Password=SUA_SENHA;"
 
-# 3. Migrations no Oracle (as duas: InitialCreate + AdicionarUsuarios)
-dotnet tool install --global dotnet-ef        # se ainda não tiver
+# 3. Migrations
+dotnet tool install --global dotnet-ef
 dotnet ef database update --project src/Clyvo.PetCare.Infrastructure --startup-project src/Clyvo.PetCare.Api
 
-# 4. Subir a API
+# 4. API
 dotnet run --project src/Clyvo.PetCare.Api
 ```
 
-A API sobe em `http://localhost:5000` e a raiz redireciona para o **Swagger** (`/swagger`). No Visual Studio, abra `Clyvo.PetCare.sln`, defina `Clyvo.PetCare.Api` como projeto de inicialização e pressione F5.
+Acesse **http://localhost:5000/swagger**. No Visual Studio, abra `Clyvo.PetCare.sln` e execute o projeto `Clyvo.PetCare.Api`.
 
-> **Já aplicou a migration da Sprint 3?** Basta rodar o `database update` de novo: só a `AdicionarUsuarios` será aplicada.
-> **Prefere SQL puro?** Os scripts em [`scripts/`](scripts) criam o mesmo schema e incluem usuários de demonstração.
-
-### Configuração (`appsettings.json`)
-
-| Seção | Para quê |
+| Configuração (`appsettings.json`) | Uso |
 |---|---|
-| `ConnectionStrings:OracleFiap` | Oracle (use *user-secrets* para a senha) |
-| `MongoDb` | `ConnectionString`, `Database`, `ColecaoAuditoria`, `TimeoutSegundos` |
-| `Jwt` | `Issuer`, `Audience`, `ChaveSecreta` (≥ 32 bytes), `ExpiracaoMinutos` |
-| `SeedAdmin` | administrador criado automaticamente na primeira subida |
-| `Serilog` | níveis, sinks e formatos de log |
+| `ConnectionStrings:OracleFiap` | conexão com o Oracle |
+| `MongoDb` | conexão, banco e coleção da auditoria |
+| `Jwt` | emissor, audiência, chave e validade do token |
+| `SeedAdmin` | administrador criado na primeira execução |
+| `Serilog` | níveis e destinos dos logs |
 
----
-
-## Roteiro de demonstração
-
-O arquivo [`src/Clyvo.PetCare.Api/Clyvo.PetCare.Api.http`](src/Clyvo.PetCare.Api/Clyvo.PetCare.Api.http) tem todas as chamadas na ordem abaixo (abre direto no Visual Studio/VS Code):
-
-1. `POST /auth/login` como admin → copiar o token → **Authorize** no Swagger.
-2. Criar tutor (com CPF pontuado), pet e veterinário — observar os **links HATEOAS** nas respostas.
-3. `GET /tutores?ordenarPor=DataCadastro&direcao=Desc&tamanhoPagina=5` — paginação, ordenação e links de navegação.
-4. Agendar consulta; tentar marcá-la como **Realizada sem diagnóstico** → **422 ProblemDetails**.
-5. Evoluir a consulta com diagnóstico e retorno → `GET /consultas/retornos-proximos/60`.
-6. `GET /vacinas/atrasadas` — motor preventivo.
-7. Logar como atendente e tentar `DELETE` → **403**.
-8. `GET /auditoria?entidade=Consulta` e `GET /auditoria/resumo` — dados vindos do **MongoDB** (aggregation).
-9. `GET /health`, `/health/ready` e `/metrics`; mostrar o `X-Correlation-Id` nos logs.
-
----
-
-## Decisões técnicas
-
-- **Domínio rico em vez de anêmico** — as regras moram na entidade e são testadas sem banco nem mock.
-- **Exceções como fluxo de erro** — o serviço sempre devolve um DTO válido ou lança uma exceção semântica; o handler global decide o status HTTP. Resultado: controllers de uma linha por ação, sem `if (x is null) return NotFound()`.
-- **Enums para `ordenarPor`** — validação automática, documentação automática no Swagger e nenhum risco de ordenar por coluna arbitrária.
-- **Oracle para dados clínicos, MongoDB para auditoria** — cada banco no que faz melhor; a auditoria não pode derrubar a operação principal.
-- **HATEOAS com `LinkGenerator`** — links gerados a partir das rotas reais, em URLs absolutas e minúsculas.
-- **Testes de integração com JWT real** — nada de handler de autenticação falso: os testes exercitam emissão, validação e políticas exatamente como em produção.
-
-### Próximos passos
-
-- Exportar traces via OTLP para Jaeger/Grafana Tempo e alertas de SLO no Grafana.
-- Refresh token e bloqueio após tentativas de login seguidas.
-- Disparo real dos lembretes (e-mail/WhatsApp) a partir do motor preventivo.
-- Dashboard analítico para clínicas (taxa de retorno, abandono de tratamento).
+Alternativa às migrations: os scripts de [`scripts/`](scripts) criam o mesmo schema no Oracle. Exemplos prontos de requisições estão em `src/Clyvo.PetCare.Api/Clyvo.PetCare.Api.http`.
 
 ---
 

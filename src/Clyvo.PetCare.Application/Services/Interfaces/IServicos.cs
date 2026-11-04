@@ -73,6 +73,7 @@ public interface IAuthService
     Task<TokenDto> LoginAsync(LoginDto dto, CancellationToken cancellationToken = default);
     Task<UsuarioDto> CriarUsuarioAsync(CriarUsuarioDto dto, CancellationToken cancellationToken = default);
     Task<UsuarioDto> BuscarUsuarioPorIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<UsuarioDto> BuscarUsuarioAtualAsync(CancellationToken cancellationToken = default);
 }
 
 /// <summary>
