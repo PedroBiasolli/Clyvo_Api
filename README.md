@@ -6,7 +6,7 @@ API REST em .NET 8 para a continuidade do cuidado na saúde de cachorros: tutore
 ![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet&logoColor=white)
 ![Oracle](https://img.shields.io/badge/Oracle-EF%20Core%208-F80000?style=flat-square&logo=oracle&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=flat-square&logo=mongodb&logoColor=white)
-![Testes](https://img.shields.io/badge/testes-__TOTAL__%20passando-brightgreen?style=flat-square)
+![Testes](https://img.shields.io/badge/testes-185%20passando-brightgreen?style=flat-square)
 
 ## Integrantes — 2TDSPO
 
@@ -46,8 +46,8 @@ API REST em .NET 8 para a continuidade do cuidado na saúde de cachorros: tutore
 | Repositórios com padrão Repository | | `RepositoryBase<T>`, 6 repositórios EF, 1 MongoDB e Unit of Work | `Infrastructure/Persistence/Repositories` |
 | Health Checks | 20 | `/health`, `/health/live`, `/health/ready` | `Api/Configuration/ObservabilidadeConfiguration.cs` |
 | Logging estruturado | | Serilog com CorrelationId | `appsettings.json` (seção `Serilog`) |
-| Testes unitários e de integração (AAA, xUnit) | | __UNIT__ unitários + __INT__ de integração, todos passando | `tests/` |
-| Cobertura de Domínio e Aplicação | | Domínio **__DOM__** · Aplicação **__APP__** | CI (`.github/workflows/ci.yml`) |
+| Testes unitários e de integração (AAA, xUnit) | | 134 unitários + 51 de integração, todos passando | `tests/` |
+| Cobertura de Domínio e Aplicação | | Domínio **98,1%** · Aplicação **96,6%** | CI (`.github/workflows/ci.yml`) |
 | Documentação e README final | 10 | Este README, Swagger e scripts SQL | — |
 
 ---
@@ -289,17 +289,17 @@ Serilog com saída no console e em arquivo diário JSON (`logs/clyvo-api-AAAAMMD
 
 | Projeto | Testes | Cobertura |
 |---|---|---|
-| `Clyvo.PetCare.UnitTests` | __UNIT__ | Regras do domínio, serviços com Moq, mapeamentos, tratamento de exceções, controller e HATEOAS |
-| `Clyvo.PetCare.IntegrationTests` | __INT__ | Pipeline HTTP completo com `WebApplicationFactory` e JWT real: autenticação, permissões, validações, paginação, HATEOAS, fluxo clínico, auditoria e health checks |
+| `Clyvo.PetCare.UnitTests` | 134 | Regras do domínio, serviços com Moq, mapeamentos, tratamento de exceções, controller e HATEOAS |
+| `Clyvo.PetCare.IntegrationTests` | 51 | Pipeline HTTP completo com `WebApplicationFactory` e JWT real: autenticação, permissões, validações, paginação, HATEOAS, fluxo clínico, auditoria e health checks |
 
 Resultado no GitHub Actions (executado a cada push):
 
 | Verificação | Resultado |
 |---|---|
 | Build | ✅ 0 erros · 0 avisos |
-| Testes | ✅ __TOTAL__ de __TOTAL__ passando |
-| Cobertura de linhas — Domínio | ✅ __DOM__ |
-| Cobertura de linhas — Aplicação | ✅ __APP__ |
+| Testes | ✅ 185 de 185 passando |
+| Cobertura de linhas — Domínio | ✅ 98,1% |
+| Cobertura de linhas — Aplicação | ✅ 96,6% |
 
 O CI falha se a cobertura de Domínio ou de Aplicação ficar abaixo de 70%. Os testes de integração usam EF Core InMemory e um repositório de auditoria em memória, então não precisam de Oracle nem MongoDB.
 
