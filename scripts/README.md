@@ -6,8 +6,9 @@ Esta pasta contém scripts de criação de schema e dados de exemplo para o Orac
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `01_schema_oracle.sql` | DDL completo: tabelas, constraints, índices |
-| `02_seed_data.sql` | Dados de exemplo (tutores, pets, veterinários, consultas, vacinas) |
+| `01_schema_oracle.sql` | DDL completo: tabelas, constraints, índices (inclui `TB_USUARIO` da Sprint 4) |
+| `00_cleanup.sql` | Remove todas as tabelas (inclusive `__EFMigrationsHistory`) para recomeçar |
+| `02_seed_data.sql` | Dados de exemplo (tutores, pets, veterinários, consultas, vacinas e usuários da API) |
 
 ## Quando usar
 
@@ -28,3 +29,15 @@ A forma **recomendada** de criar o schema é via EF Core Migrations (veja README
 ```
 
 > **Atenção:** Em ambiente de produção/avaliação, NÃO execute o `DROP TABLE` comentado no início do schema sem ter certeza do que está fazendo.
+
+## Usuários de demonstração (seed)
+
+| E-mail | Perfil | Senha |
+|---|---|---|
+| admin@clyvo.com.br | Admin | Clyvo@2026 |
+| ana.lima@clyvo.com.br | Veterinario | Clyvo@2026 |
+| recepcao@clyvo.com.br | Atendente | Clyvo@2026 |
+
+> Pela rota de Migrations não é preciso rodar este seed: a API cria o administrador automaticamente na primeira subida (seção `SeedAdmin` do `appsettings.json`).
+
+> Os scripts são uma alternativa às Migrations — use **um** caminho ou o outro no mesmo schema, nunca os dois.

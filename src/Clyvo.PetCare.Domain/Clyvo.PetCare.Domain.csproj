@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Camada de Domínio — núcleo da Clean Architecture.
+    Não referencia nenhum outro projeto nem pacote de framework:
+    entidades, regras de negócio, contratos de repositório e exceções de domínio.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <RootNamespace>Clyvo.PetCare.Domain</RootNamespace>
+  </PropertyGroup>
+
+</Project>

@@ -69,4 +69,16 @@ VALUES ('Tosse dos Canis', DATE '2025-09-10', DATE '2026-09-10', 'LT2025-TC', 'B
 INSERT INTO TB_VACINA (NM_VACINA, DT_APLICACAO, DT_PROXIMA_DOSE, ID_PET, ID_VETERINARIO)
 VALUES ('Giárdia', DATE '2025-11-05', DATE '2026-11-05', 4, 1);
 
+-- Usuários da API (Sprint 4). Todos com a senha de demonstração "Clyvo@2026"
+-- (hash PBKDF2-HMAC-SHA512, 100 mil iterações — formato do ASP.NET Core Identity).
+-- TP_PERFIL: 1=Admin, 2=Veterinario, 3=Atendente
+INSERT INTO TB_USUARIO (NM_USUARIO, DS_EMAIL, DS_SENHA_HASH, TP_PERFIL)
+VALUES ('Administrador Clyvo', 'admin@clyvo.com.br', 'AQAAAAIAAYagAAAAEP4ZOfejLoVZEpsmID/pZZgc/y/R7dwvvXlFCxSOAmejstmIhHJ58R2Dg913HsJRQQ==', 1);
+
+INSERT INTO TB_USUARIO (NM_USUARIO, DS_EMAIL, DS_SENHA_HASH, TP_PERFIL)
+VALUES ('Dra. Ana Lima', 'ana.lima@clyvo.com.br', 'AQAAAAIAAYagAAAAEP4ZOfejLoVZEpsmID/pZZgc/y/R7dwvvXlFCxSOAmejstmIhHJ58R2Dg913HsJRQQ==', 2);
+
+INSERT INTO TB_USUARIO (NM_USUARIO, DS_EMAIL, DS_SENHA_HASH, TP_PERFIL)
+VALUES ('Recepção Clyvo', 'recepcao@clyvo.com.br', 'AQAAAAIAAYagAAAAEP4ZOfejLoVZEpsmID/pZZgc/y/R7dwvvXlFCxSOAmejstmIhHJ58R2Dg913HsJRQQ==', 3);
+
 COMMIT;

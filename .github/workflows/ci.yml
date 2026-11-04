@@ -1,0 +1,47 @@
+name: CI — build, testes e cobertura
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore Clyvo.PetCare.sln
+
+      - name: Build
+        run: dotnet build Clyvo.PetCare.sln --no-restore -c Release
+
+      - name: Testes (unitários + integração) com cobertura
+        run: >
+          dotnet test Clyvo.PetCare.sln --no-build -c Release
+          --settings coverlet.runsettings
+          --collect:"XPlat Code Coverage"
+          --results-directory ./TestResults
+          --logger "trx;LogFilePrefix=resultado"
+
+      - name: Relatório de cobertura
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:coverage -reporttypes:"Cobertura;Html;MarkdownSummaryGithub"
+          cat coverage/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cobertura mínima de Domínio e Aplicação (70%)
+        run: python3 scripts/ci/verificar_cobertura.py coverage/Cobertura.xml 0.70
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cobertura-e-resultados
+          path: |
+            coverage
+            TestResults/**/*.trx

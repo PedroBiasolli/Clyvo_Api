@@ -1,10 +1,19 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.Api", "Clyvo.PetCare.Api\Clyvo.PetCare.Api.csproj", "{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A1B2C3D4-E5F6-4789-9ABC-DEF012345000}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A1B2C3D4-E5F6-4789-9ABC-DEF012345001}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.Domain", "src\Clyvo.PetCare.Domain\Clyvo.PetCare.Domain.csproj", "{1A1D0001-0000-4000-8000-000000000001}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.Application", "src\Clyvo.PetCare.Application\Clyvo.PetCare.Application.csproj", "{1A1D0001-0000-4000-8000-000000000002}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.Infrastructure", "src\Clyvo.PetCare.Infrastructure\Clyvo.PetCare.Infrastructure.csproj", "{1A1D0001-0000-4000-8000-000000000003}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.Api", "src\Clyvo.PetCare.Api\Clyvo.PetCare.Api.csproj", "{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Clyvo.PetCare.UnitTests", "tests\Clyvo.PetCare.UnitTests\Clyvo.PetCare.UnitTests.csproj", "{B1B2C3D4-E5F6-4789-9ABC-DEF012345002}"
 EndProject
@@ -16,6 +25,18 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1A1D0001-0000-4000-8000-000000000001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A1D0001-0000-4000-8000-000000000001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A1D0001-0000-4000-8000-000000000001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A1D0001-0000-4000-8000-000000000001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A1D0001-0000-4000-8000-000000000002}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A1D0001-0000-4000-8000-000000000002}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A1D0001-0000-4000-8000-000000000002}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A1D0001-0000-4000-8000-000000000002}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A1D0001-0000-4000-8000-000000000003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A1D0001-0000-4000-8000-000000000003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A1D0001-0000-4000-8000-000000000003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A1D0001-0000-4000-8000-000000000003}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +54,10 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{1A1D0001-0000-4000-8000-000000000001} = {A1B2C3D4-E5F6-4789-9ABC-DEF012345000}
+		{1A1D0001-0000-4000-8000-000000000002} = {A1B2C3D4-E5F6-4789-9ABC-DEF012345000}
+		{1A1D0001-0000-4000-8000-000000000003} = {A1B2C3D4-E5F6-4789-9ABC-DEF012345000}
+		{8D3A0E2F-1B5C-4E7A-9D2B-3C4F5A6B7C8D} = {A1B2C3D4-E5F6-4789-9ABC-DEF012345000}
 		{B1B2C3D4-E5F6-4789-9ABC-DEF012345002} = {A1B2C3D4-E5F6-4789-9ABC-DEF012345001}
 		{C1B2C3D4-E5F6-4789-9ABC-DEF012345003} = {A1B2C3D4-E5F6-4789-9ABC-DEF012345001}
 	EndGlobalSection

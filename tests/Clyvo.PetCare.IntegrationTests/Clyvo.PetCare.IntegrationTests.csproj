@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Clyvo.PetCare.Api\Clyvo.PetCare.Api.csproj" />
+    <ProjectReference Include="..\..\src\Clyvo.PetCare.Api\Clyvo.PetCare.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>
