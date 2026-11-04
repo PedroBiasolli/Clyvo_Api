@@ -2,7 +2,9 @@
 
 API REST para acompanhamento contínuo da jornada de saúde de cachorros — tutores, pets, veterinários, consultas, carteira de vacinação e motor preventivo de lembretes. Construída no Challenge FIAP 2026 em parceria com a Clyvo VET.
 
-[![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF?style=flat-square&logo=githubactions&logoColor=white)](.github/workflows/ci.yml)
+[![CI](https://github.com/PedroBiasolli/Clyvo_Api/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/PedroBiasolli/Clyvo_Api/actions/workflows/ci.yml)
+[![Testes](https://img.shields.io/badge/testes-182%20passando-brightgreen?style=flat-square)](#testes-automatizados)
+[![Cobertura](https://img.shields.io/badge/cobertura%20Dom%C3%ADnio%2FAplica%C3%A7%C3%A3o-98%25%20%2F%2097%25-brightgreen?style=flat-square)](#testes-automatizados)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![EF Core](https://img.shields.io/badge/EF%20Core-8.0-512BD4?style=flat-square)](https://learn.microsoft.com/ef/core/)
 [![Oracle](https://img.shields.io/badge/Oracle-19c-F80000?style=flat-square&logo=oracle&logoColor=white)](https://www.oracle.com/database/)
@@ -67,8 +69,8 @@ A Clyvo Pet Care inverte essa lógica: a clínica passa a ter visão completa do
 | **Repository concreto** | | `RepositoryBase<T>` + 6 repositórios EF + repositório Mongo + Unit of Work | `Infrastructure/Persistence/Repositories` |
 | **Health Checks** | 20 | `/health`, `/health/live`, `/health/ready` — self, Oracle e MongoDB | [Health checks](#health-checks) |
 | **Logging estruturado** | | Serilog (console + arquivo JSON) com CorrelationId, usuário, máquina, thread | [Logging](#logging-estruturado--serilog) |
-| **Testes unitários e de integração (AAA)** | | **105** métodos unitários (131 casos) + **51** de integração com JWT real | [Testes](#testes-automatizados) |
-| **Cobertura de Domínio e Aplicação** | | Coverlet + ReportGenerator; o CI falha se Domínio ou Aplicação ficarem abaixo de 70% | `.github/workflows/ci.yml` |
+| **Testes unitários e de integração (AAA)** | | **182 testes, todos passando**: 131 casos unitários + 51 de integração com JWT real | [Testes](#testes-automatizados) |
+| **Cobertura de Domínio e Aplicação** | | **Domínio 98,1% · Aplicação 96,6%** de linhas (Coverlet + ReportGenerator); o CI falha abaixo de 70% | `.github/workflows/ci.yml` |
 | **Documentação e README final** | 10 | Este README + Swagger + `.http` de demonstração + scripts SQL comentados | — |
 
 ---
@@ -434,6 +436,18 @@ reportgenerator -reports:"TestResults/**/coverage.cobertura.xml" -targetdir:cove
 ```
 
 O workflow `.github/workflows/ci.yml` roda build, todos os testes e gera o relatório de cobertura a cada push; o job **falha se a cobertura de linhas de Domínio ou de Aplicação ficar abaixo de 70%**.
+
+### Resultado no CI (GitHub Actions)
+
+| Verificação | Resultado |
+|---|---|
+| Build da solução | ✅ 0 erros · 0 avisos |
+| Testes unitários | ✅ 131 / 131 |
+| Testes de integração | ✅ 51 / 51 |
+| Cobertura de linhas — **Domínio** | ✅ **98,1%** |
+| Cobertura de linhas — **Aplicação** | ✅ **96,6%** |
+
+O relatório HTML completo fica disponível como artefato (`cobertura-e-resultados`) em cada execução da aba **Actions**.
 
 ---
 

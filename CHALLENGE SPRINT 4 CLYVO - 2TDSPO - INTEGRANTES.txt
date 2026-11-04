@@ -1,4 +1,5 @@
 CHALLENGE SPRINT 4 CLYVO - 2TDSPO
+Advanced Business Development with .NET
 
 INTEGRANTES
 
@@ -11,3 +12,13 @@ BRUNO ZANATELI - RM563736
 CHRISTIAN FREITAS - RM566098
 
 MATHEUS ENRICO - RM562532
+
+
+REPOSITÓRIO
+https://github.com/PedroBiasolli/Clyvo_Api
+
+DOCUMENTAÇÃO (README)
+https://github.com/PedroBiasolli/Clyvo_Api#readme
+
+CI — BUILD, TESTES E COBERTURA
+https://github.com/PedroBiasolli/Clyvo_Api/actions/workflows/ci.yml
