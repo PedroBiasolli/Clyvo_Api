@@ -2,7 +2,6 @@ using Clyvo.PetCare.Api.Hateoas;
 using Clyvo.PetCare.Api.Security;
 using Clyvo.PetCare.Application.DTOs.Auth;
 using Clyvo.PetCare.Application.Services.Interfaces;
-using Clyvo.PetCare.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -36,12 +35,7 @@ public sealed class AuthController : ApiControllerBase
     [HttpGet("me")]
     [ProducesResponseType(typeof(UsuarioDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<UsuarioDto>> UsuarioLogado(CancellationToken cancellationToken)
-    {
-        if (!int.TryParse(User.FindFirst(ClaimsClyvo.Id)?.Value, out var usuarioId))
-            return Unauthorized();
-
-        return Ok(ComLinks(await _service.BuscarUsuarioPorIdAsync(usuarioId, cancellationToken)));
-    }
+        => Ok(ComLinks(await _service.BuscarUsuarioAtualAsync(cancellationToken)));
 
     /// <summary>Busca um usuário pelo identificador (somente Admin).</summary>
     [HttpGet("usuarios/{id:int}")]

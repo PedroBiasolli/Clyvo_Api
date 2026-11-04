@@ -1,5 +1,5 @@
-# Roteiro de demonstração da Sprint 4 (Visual Studio / VS Code REST Client / Rider).
-# 1) Rode o login, copie o accessToken para @token e siga a ordem.
+# Exemplos de requisições da Clyvo Pet Care API (Visual Studio / VS Code REST Client / Rider).
+# Faça o login, copie o accessToken para @token e execute as demais requisições.
 
 @baseUrl = http://localhost:5000
 @token = COLE_AQUI_O_ACCESS_TOKEN

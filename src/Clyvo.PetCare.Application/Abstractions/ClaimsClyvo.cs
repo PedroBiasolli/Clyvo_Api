@@ -1,8 +1,9 @@
-namespace Clyvo.PetCare.Infrastructure.Security;
+namespace Clyvo.PetCare.Application.Abstractions;
 
 /// <summary>
-/// Nomes curtos (padrão JWT) das claims emitidas. A validação desliga o
-/// mapeamento automático de claims, então emissor e validador usam estes nomes.
+/// Contrato das claims do token de acesso (nomes curtos do padrão JWT).
+/// Compartilhado entre quem emite o token (Infraestrutura) e quem o lê (Api),
+/// sem que uma camada externa dependa da outra.
 /// </summary>
 public static class ClaimsClyvo
 {

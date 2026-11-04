@@ -1,6 +1,5 @@
 using Clyvo.PetCare.Api.Middlewares;
 using Clyvo.PetCare.Application.Abstractions;
-using Clyvo.PetCare.Infrastructure.Security;
 
 namespace Clyvo.PetCare.Api.Security;
 
@@ -11,6 +10,9 @@ public sealed class UsuarioAtual : IUsuarioAtual
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UsuarioAtual(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
+
+    public int? Id
+        => int.TryParse(_httpContextAccessor.HttpContext?.User.FindFirst(ClaimsClyvo.Id)?.Value, out var id) ? id : null;
 
     public string Identificador
         => _httpContextAccessor.HttpContext?.User.FindFirst(ClaimsClyvo.Email)?.Value ?? Anonimo;
